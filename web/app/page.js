@@ -79,6 +79,19 @@ export default function Home() {
     return () => subscription?.unsubscribe();
   }, []);
 
+  // Surface any OAuth redirect errors in toast
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const authError = params.get("error");
+      if (authError) {
+        setUpdateToast(`Sign-in notice: ${authError}`);
+        setTimeout(() => setUpdateToast(""), 6000);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
+
   const handleSignInWithGoogle = async () => {
     const supabase = createClient();
     if (!supabase) {
