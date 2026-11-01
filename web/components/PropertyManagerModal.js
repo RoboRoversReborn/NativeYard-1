@@ -278,13 +278,16 @@ export default function PropertyManagerModal({
                 {currentProperty?.yard_areas?.map((area) => {
                   const isSelected = area.id === selectedAreaId;
                   const scans = area.yard_scans || [];
-                  const latestScore = scans.length > 0 ? scans[scans.length - 1].native_score : null;
+                  const latestScore = scans.length > 0 ? scans[0]?.native_score : null;
 
                   return (
                     <div
                       key={area.id}
                       className={`area-item-card ${isSelected ? "selected" : ""}`}
-                      onClick={() => onSelectArea(area.id)}
+                      onClick={() => {
+                        onSelectArea(area.id);
+                        if (scans.length > 0) onClose();
+                      }}
                     >
                       <div className="area-card-header">
                         <div className="area-card-title">
@@ -309,6 +312,21 @@ export default function PropertyManagerModal({
                         <span>🌱 {area.soil_type}</span>
                         <span>📸 {scans.length} Scans</span>
                       </div>
+
+                      {scans.length > 0 && (
+                        <button
+                          type="button"
+                          className="history-load-btn"
+                          style={{ marginTop: "6px" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectArea(area.id);
+                            onClose();
+                          }}
+                        >
+                          🔍 Open Layout in Visualizer
+                        </button>
+                      )}
                     </div>
                   );
                 })}

@@ -134,50 +134,138 @@ export default function Home() {
   const [selectedAreaId, setSelectedAreaId] = useState(null);
   const [showPropertyModal, setShowPropertyModal] = useState(false);
   const [isSavingScan, setIsSavingScan] = useState(false);
+  const handleLoadPastScan = (scan) => {
+    if (!scan) return;
 
-  const loadUserProperties = async () => {
+    if (scan.yard_area_id) {
+      setSelectedAreaId(scan.yard_area_id);
+    }
+
+    let rawList = [];
+    if (Array.isArray(scan.detected_plants)) {
+      rawList = scan.detected_plants;
+    } else if (typeof scan.detected_plants === "string") {
+      try {
+        rawList = JSON.parse(scan.detected_plants);
+      } catch (e) {
+        rawList = [];
+      }
+    }
+
+    const enriched = rawList.map((p, idx) => enrichPlant(p, idx));
+    const scoreReport = computeScore(enriched);
+
+    if ((scoreReport.score === null || scoreReport.score === undefined) && scan.native_score !== undefined) {
+      scoreReport.score = scan.native_score;
+      scoreReport.grade = scan.grade || "Eco Audit";
+    }
+
+    setAnalysisData({
+      imageUrl: scan.photo_url,
+      plants: enriched,
+      scoreReport,
+      sampleName: `${scan.areaName || "Saved"} Yard Layout (${new Date(scan.created_at).toLocaleDateString()})`,
+    });
+    setSelectedPlantId(enriched.length > 0 ? enriched[0].id : null);
+    setSelectedSample(null);
+
+    setUpdateToast(`Loaded saved layout for ${scan.areaName || "yard"} (Native Score: ${scan.native_score ?? scoreReport.score ?? 0})`);
+    setTimeout(() => setUpdateToast(""), 4500);
+  };
+
+  const handleSelectArea = (areaId, customProperties = null) => {
+    setSelectedAreaId(areaId);
+    const propList = customProperties || properties;
+
+    let targetArea = null;
+    let targetProp = null;
+    for (const p of propList) {
+      const found = p.yard_areas?.find((a) => a.id === areaId);
+      if (found) {
+        targetArea = found;
+        targetProp = p;
+        break;
+      }
+    }
+
+    if (!targetArea) return;
+
+    if (targetProp && targetProp.id !== selectedPropertyId) {
+      setSelectedPropertyId(targetProp.id);
+    }
+
+    const scans = targetArea.yard_scans || [];
+    if (scans.length > 0) {
+      const sortedScans = [...scans].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+      const latestScan = sortedScans[0];
+      handleLoadPastScan({
+        ...latestScan,
+        areaName: targetArea.name,
+        yard_area_id: targetArea.id,
+      });
+    } else {
+      setUpdateToast(`Switched to ${targetArea.name} (No saved layout yet. Scan or upload a photo to start!)`);
+      setTimeout(() => setUpdateToast(""), 4500);
+    }
+  };
+
+  const handleSelectProperty = (propId) => {
+    setSelectedPropertyId(propId);
+    const prop = properties.find((p) => p.id === propId);
+    if (prop && prop.yard_areas?.length > 0) {
+      const firstArea = prop.yard_areas[0];
+      handleSelectArea(firstArea.id);
+    } else {
+      setSelectedAreaId(null);
+    }
+  };
+
+  const loadUserProperties = async (autoLoadLatest = true) => {
     try {
       const data = await getPropertiesWithAreas();
       setProperties(data);
       if (data.length > 0) {
-        setSelectedPropertyId((prev) => {
-          if (prev && data.some((p) => p.id === prev)) return prev;
-          return data[0].id;
-        });
-        const firstArea = data[0].yard_areas?.[0];
-        setSelectedAreaId((prev) => {
-          if (prev && data.some((p) => p.yard_areas?.some((a) => a.id === prev))) return prev;
-          return firstArea ? firstArea.id : null;
-        });
+        const activeProp =
+          data.find((p) => p.id === selectedPropertyId) || data[0];
+        setSelectedPropertyId(activeProp.id);
+
+        const activeArea =
+          activeProp.yard_areas?.find((a) => a.id === selectedAreaId) ||
+          activeProp.yard_areas?.[0];
+
+        if (activeArea) {
+          setSelectedAreaId(activeArea.id);
+
+          if (autoLoadLatest && activeArea.yard_scans?.length > 0) {
+            const sortedScans = [...activeArea.yard_scans].sort(
+              (a, b) => new Date(b.created_at) - new Date(a.created_at)
+            );
+            handleLoadPastScan({
+              ...sortedScans[0],
+              areaName: activeArea.name,
+              yard_area_id: activeArea.id,
+            });
+          }
+        }
       }
+      return data;
     } catch (e) {
       console.warn("Error loading user properties:", e);
+      return [];
     }
   };
 
   useEffect(() => {
     if (user) {
-      loadUserProperties();
+      loadUserProperties(true);
     } else {
       setProperties([]);
       setSelectedPropertyId(null);
       setSelectedAreaId(null);
     }
   }, [user]);
-
-  const handleSelectProperty = (propId) => {
-    setSelectedPropertyId(propId);
-    const prop = properties.find((p) => p.id === propId);
-    if (prop && prop.yard_areas?.length > 0) {
-      setSelectedAreaId(prop.yard_areas[0].id);
-    } else {
-      setSelectedAreaId(null);
-    }
-  };
-
-  const handleSelectArea = (areaId) => {
-    setSelectedAreaId(areaId);
-  };
 
   const handleSaveCurrentScan = async () => {
     if (!selectedAreaId || !analysisData) {
@@ -197,7 +285,7 @@ export default function Home() {
 
       setUpdateToast("Successfully saved yard audit to your property!");
       setTimeout(() => setUpdateToast(""), 4500);
-      await loadUserProperties();
+      await loadUserProperties(false);
     } catch (err) {
       console.error(err);
       setUpdateToast(`Save failed: ${err.message || "Could not save scan"}`);
@@ -205,22 +293,6 @@ export default function Home() {
     } finally {
       setIsSavingScan(false);
     }
-  };
-
-  const handleLoadPastScan = (scan) => {
-    if (!scan) return;
-    const enriched = (scan.detected_plants || []).map((p, idx) => enrichPlant(p, idx));
-    const scoreReport = computeScore(enriched);
-
-    setAnalysisData({
-      imageUrl: scan.photo_url,
-      plants: enriched,
-      scoreReport,
-      sampleName: `${scan.areaName} Audit (${new Date(scan.created_at).toLocaleDateString()})`,
-    });
-
-    setUpdateToast(`Loaded past audit from ${scan.areaName} (Score: ${scan.native_score})`);
-    setTimeout(() => setUpdateToast(""), 4500);
   };
   const fileInputRef = useRef(null);
   const mobileYardCameraRef = useRef(null);

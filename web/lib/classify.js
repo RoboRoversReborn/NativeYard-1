@@ -203,7 +203,7 @@ export function enrichPlant(raw, index) {
   return {
     id: raw.id || `plant-${index + 1}`,
     index: index + 1,
-    box: raw.box,
+    box: raw.box || raw.box_2d,
     common: raw.common || c.knownCommon || raw.guessCommon || "Unverified Plant",
     sci: raw.sci || raw.guessScientific || "Unknown species",
     kind: raw.kind || "plant",

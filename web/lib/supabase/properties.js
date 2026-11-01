@@ -27,6 +27,7 @@ export async function getPropertiesWithAreas() {
         created_at,
         yard_scans (
           id,
+          yard_area_id,
           photo_url,
           native_score,
           grade,
@@ -46,6 +47,15 @@ export async function getPropertiesWithAreas() {
   if (error) {
     console.error("Error fetching properties:", error.message);
     return [];
+  }
+
+  // Ensure all yard_scans are sorted newest first
+  for (const prop of properties || []) {
+    for (const area of prop.yard_areas || []) {
+      if (area.yard_scans && Array.isArray(area.yard_scans)) {
+        area.yard_scans.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+    }
   }
 
   return properties || [];

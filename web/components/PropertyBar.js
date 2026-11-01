@@ -84,7 +84,7 @@ export default function PropertyBar({
             {currentProperty?.yard_areas?.map((area) => {
               const isActive = area.id === currentArea?.id;
               const scanCount = area.yard_scans?.length || 0;
-              const latestScan = area.yard_scans?.[area.yard_scans.length - 1];
+              const latestScan = area.yard_scans?.[0];
               return (
                 <button
                   key={area.id}
