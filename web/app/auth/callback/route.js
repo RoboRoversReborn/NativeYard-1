@@ -2,17 +2,29 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
-  const origin = requestUrl.origin;
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  const next = searchParams.get("next") ?? "/";
 
   if (code) {
     const supabase = await createClient();
     if (supabase) {
-      await supabase.auth.exchangeCodeForSession(code);
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (error) {
+        console.error("Supabase code exchange error:", error.message);
+      }
     }
   }
 
-  // URL to redirect to after sign-in process completes
-  return NextResponse.redirect(`${origin}/`);
+  // Handle reverse-proxy origin on Vercel production
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const isLocalEnv = process.env.NODE_ENV === "development";
+
+  if (isLocalEnv || !forwardedHost) {
+    return NextResponse.redirect(`${origin}${next}`);
+  }
+
+  // On Vercel, use https with the original forwarded domain
+  return NextResponse.redirect(`https://${forwardedHost}${next}`);
 }
+
