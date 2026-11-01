@@ -381,36 +381,23 @@ export default function Home() {
             <span className="badge-nj">New Jersey Pilot</span>
           </a>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="header-action-group">
             <button
-              className={`key-btn ${geminiKey ? "has-key" : ""}`}
-              onClick={() => {
-                setKeyInput(geminiKey);
-                setShowKeyModal(true);
-              }}
-              title="Configure your Google Gemini API Key"
+              type="button"
+              className="btn-camera"
+              onClick={() => handleTriggerCamera("yard")}
+              title="Snap a photo of your yard using your camera"
             >
-              {geminiKey ? "🟢 Gemini Key Active" : "🔑 Enter Gemini Key"}
+              📷 Take Photo
             </button>
-
-            <div className="header-action-group">
-              <button
-                type="button"
-                className="btn-camera"
-                onClick={() => handleTriggerCamera("yard")}
-                title="Snap a photo of your yard using your camera"
-              >
-                📷 Take Photo
-              </button>
-              <button
-                type="button"
-                className="btn-upload-file"
-                onClick={() => fileInputRef.current?.click()}
-                title="Upload an image file from your device"
-              >
-                📁 Upload File
-              </button>
-            </div>
+            <button
+              type="button"
+              className="btn-upload-file"
+              onClick={() => fileInputRef.current?.click()}
+              title="Upload an image file from your device"
+            >
+              📁 Upload File
+            </button>
           </div>
         </div>
       </header>
