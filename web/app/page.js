@@ -377,7 +377,7 @@ export default function Home() {
   }, [matcherCategory, matcherSearch, suggestedPlants]);
 
   return (
-    <div>
+    <div className="app-root">
       {/* Top Navigation */}
       <header className="app-header">
         <div className="container header-inner">
