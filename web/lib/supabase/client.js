@@ -5,10 +5,16 @@ import { createBrowserClient } from "@supabase/ssr";
  * Returns null if environment variables are not yet configured.
  */
 export function createClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim().replace(/^["']|["']$/g, "");
+  const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim().replace(/^["']|["']$/g, "");
 
   if (!supabaseUrl || !supabaseAnonKey) {
+    if (typeof window !== "undefined") {
+      console.warn("Supabase browser config check:", {
+        hasUrl: !!supabaseUrl,
+        hasKey: !!supabaseAnonKey,
+      });
+    }
     return null;
   }
 
