@@ -6,6 +6,10 @@ import { enrichPlant, computeScore, COLOR_MAP } from "@/lib/classify";
 import { getPlantImage } from "@/lib/plantImages";
 import LiveCameraModal from "@/components/LiveCameraModal";
 import { isMobileOrTablet } from "@/lib/camera";
+import { createClient } from "@/lib/supabase/client";
+import PropertyBar from "@/components/PropertyBar";
+import PropertyManagerModal from "@/components/PropertyManagerModal";
+import { getPropertiesWithAreas, saveYardScan } from "@/lib/supabase/properties";
 
 export default function Home() {
   const [selectedSample, setSelectedSample] = useState("front-yard");
@@ -33,6 +37,178 @@ export default function Home() {
     title: "Yard Camera Viewfinder",
     subTitle: "Position your camera to capture the yard landscape and click the shutter button",
   });
+
+  // Supabase Authentication State
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const userMenuRef = useRef(null);
+
+  // Close user dropdown menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Check current session & listen for auth changes
+  useEffect(() => {
+    const supabase = createClient();
+    if (!supabase) {
+      setAuthLoading(false);
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    return () => subscription?.unsubscribe();
+  }, []);
+
+  const handleSignInWithGoogle = async () => {
+    const supabase = createClient();
+    if (!supabase) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${origin}/auth/callback`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error) {
+      setUpdateToast(`Sign-in error: ${error.message}`);
+      setTimeout(() => setUpdateToast(""), 4500);
+    }
+  };
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    if (supabase) {
+      await supabase.auth.signOut();
+      setUser(null);
+      setUserMenuOpen(false);
+      setUpdateToast("Signed out successfully");
+      setTimeout(() => setUpdateToast(""), 3500);
+    }
+  };
+
+  // Property & Yard Area Management State
+  const [properties, setProperties] = useState([]);
+  const [selectedPropertyId, setSelectedPropertyId] = useState(null);
+  const [selectedAreaId, setSelectedAreaId] = useState(null);
+  const [showPropertyModal, setShowPropertyModal] = useState(false);
+  const [isSavingScan, setIsSavingScan] = useState(false);
+
+  const loadUserProperties = async () => {
+    try {
+      const data = await getPropertiesWithAreas();
+      setProperties(data);
+      if (data.length > 0) {
+        setSelectedPropertyId((prev) => {
+          if (prev && data.some((p) => p.id === prev)) return prev;
+          return data[0].id;
+        });
+        const firstArea = data[0].yard_areas?.[0];
+        setSelectedAreaId((prev) => {
+          if (prev && data.some((p) => p.yard_areas?.some((a) => a.id === prev))) return prev;
+          return firstArea ? firstArea.id : null;
+        });
+      }
+    } catch (e) {
+      console.warn("Error loading user properties:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      loadUserProperties();
+    } else {
+      setProperties([]);
+      setSelectedPropertyId(null);
+      setSelectedAreaId(null);
+    }
+  }, [user]);
+
+  const handleSelectProperty = (propId) => {
+    setSelectedPropertyId(propId);
+    const prop = properties.find((p) => p.id === propId);
+    if (prop && prop.yard_areas?.length > 0) {
+      setSelectedAreaId(prop.yard_areas[0].id);
+    } else {
+      setSelectedAreaId(null);
+    }
+  };
+
+  const handleSelectArea = (areaId) => {
+    setSelectedAreaId(areaId);
+  };
+
+  const handleSaveCurrentScan = async () => {
+    if (!selectedAreaId || !analysisData) {
+      setUpdateToast("Please select a yard area and analyze a yard photo first.");
+      setTimeout(() => setUpdateToast(""), 3500);
+      return;
+    }
+
+    try {
+      setIsSavingScan(true);
+      await saveYardScan(selectedAreaId, {
+        imageBlobOrDataUrl: analysisData.imageUrl,
+        scoreReport: analysisData.scoreReport,
+        plants: plants,
+        notes: `Analyzed with Native Score: ${analysisData.scoreReport?.score || 0}`,
+      });
+
+      setUpdateToast("Successfully saved yard audit to your property!");
+      setTimeout(() => setUpdateToast(""), 4500);
+      await loadUserProperties();
+    } catch (err) {
+      console.error(err);
+      setUpdateToast(`Save failed: ${err.message || "Could not save scan"}`);
+      setTimeout(() => setUpdateToast(""), 4500);
+    } finally {
+      setIsSavingScan(false);
+    }
+  };
+
+  const handleLoadPastScan = (scan) => {
+    if (!scan) return;
+    const enriched = (scan.detected_plants || []).map((p, idx) => enrichPlant(p, idx));
+    const scoreReport = computeScore(enriched);
+
+    setAnalysisData({
+      imageUrl: scan.photo_url,
+      plants: enriched,
+      scoreReport,
+      sampleName: `${scan.areaName} Audit (${new Date(scan.created_at).toLocaleDateString()})`,
+    });
+
+    setUpdateToast(`Loaded past audit from ${scan.areaName} (Score: ${scan.native_score})`);
+    setTimeout(() => setUpdateToast(""), 4500);
+  };
   const fileInputRef = useRef(null);
   const mobileYardCameraRef = useRef(null);
   const macroInputRef = useRef(null);
@@ -406,9 +582,142 @@ export default function Home() {
             >
               📁 Upload File
             </button>
+
+            {/* Google Authentication / User Profile */}
+            {authLoading ? (
+              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(115, 134, 102, 0.2)" }} />
+            ) : user ? (
+              <div className="user-profile-menu-wrap" ref={userMenuRef}>
+                <button
+                  type="button"
+                  className="user-profile-btn"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  title={user.email}
+                >
+                  {user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+                    <img
+                      src={user.user_metadata.avatar_url || user.user_metadata.picture}
+                      alt={user.user_metadata.full_name || "User"}
+                      className="user-avatar-img"
+                    />
+                  ) : (
+                    <div className="user-avatar-fallback">
+                      {(user.email?.[0] || "U").toUpperCase()}
+                    </div>
+                  )}
+                  <span className="user-name-text">
+                    {user.user_metadata?.full_name?.split(" ")[0] || user.email?.split("@")[0] || "Account"}
+                  </span>
+                  <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>▼</span>
+                </button>
+
+                {userMenuOpen && (
+                  <div className="user-dropdown-menu">
+                    <div className="user-dropdown-header">
+                      <div className="user-dropdown-name">
+                        {user.user_metadata?.full_name || "Homeowner"}
+                      </div>
+                      <div className="user-dropdown-email">{user.email}</div>
+                    </div>
+                    <button
+                      type="button"
+                      className="user-dropdown-item"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        setShowPropertyModal(true);
+                      }}
+                    >
+                      <span>🏡</span> My Properties & Yards
+                    </button>
+                    <button
+                      type="button"
+                      className="user-dropdown-item signout"
+                      onClick={handleSignOut}
+                    >
+                      <span>🚪</span> Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="btn-google-signin"
+                onClick={handleSignInWithGoogle}
+                title="Sign in with your Google / Gmail account"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span className="google-btn-text">Sign in with Google</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
+
+      {/* Supabase & Google Auth Setup Guidance Modal */}
+      {showAuthModal && (
+        <div className="modal-backdrop" onClick={() => setShowAuthModal(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "540px" }}>
+            <div className="modal-header">
+              <div className="modal-title">
+                <span>🔐</span>
+                <span>Connect Google Sign-In with Supabase</span>
+              </div>
+              <button
+                className="modal-close"
+                onClick={() => setShowAuthModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <p style={{ marginBottom: "14px", fontSize: "14px", lineHeight: "1.5" }}>
+                To enable 1-click Google (Gmail) Sign-In and save properties to your account, add your free Supabase project keys to <code>.env.local</code> (or Vercel Environment Variables):
+              </p>
+
+              <div className="step-card" style={{ textAlign: "left", fontSize: "13px" }}>
+                <div><strong>Quick Setup Steps (Free):</strong></div>
+                <div>1. Create a free project at <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">supabase.com</a></div>
+                <div>2. In Supabase Dashboard, go to <strong>Project Settings → API</strong></div>
+                <div>3. Copy <strong>Project URL</strong> and <strong>anon public API key</strong></div>
+                <div>4. Enable Google under <strong>Authentication → Providers → Google</strong> with your Google Cloud OAuth Client ID</div>
+              </div>
+
+              <div style={{ marginTop: "16px", background: "#f1f5f9", padding: "12px 14px", borderRadius: "10px", fontSize: "12px", fontFamily: "monospace" }}>
+                <div>NEXT_PUBLIC_SUPABASE_URL=https://xyzcompany.supabase.co</div>
+                <div>NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...</div>
+              </div>
+
+              <button
+                type="button"
+                className="btn-upload-file"
+                onClick={() => setShowAuthModal(false)}
+                style={{ width: "100%", marginTop: "18px", justifyContent: "center", padding: "10px" }}
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Gemini API Key Configuration Modal */}
       {showKeyModal && (
@@ -1018,6 +1327,21 @@ export default function Home() {
       )}
 
       <main className="container">
+        {/* Property & Yard Area Management Bar */}
+        <PropertyBar
+          user={user}
+          properties={properties}
+          selectedPropertyId={selectedPropertyId}
+          selectedAreaId={selectedAreaId}
+          onSelectProperty={handleSelectProperty}
+          onSelectArea={handleSelectArea}
+          onOpenManager={() => setShowPropertyModal(true)}
+          onSaveCurrentScan={handleSaveCurrentScan}
+          isSavingScan={isSavingScan}
+          hasCurrentAnalysis={!!analysisData}
+          onSignIn={handleSignInWithGoogle}
+        />
+
         {/* Hero & Color Code Legend */}
         <section className="hero">
           <div className="hero-pill">🌱 AI Landscape Biodiversity Audit</div>
@@ -1538,6 +1862,23 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Property & Yard Area Manager Modal */}
+      <PropertyManagerModal
+        isOpen={showPropertyModal}
+        onClose={() => setShowPropertyModal(false)}
+        properties={properties}
+        selectedPropertyId={selectedPropertyId}
+        selectedAreaId={selectedAreaId}
+        onSelectProperty={handleSelectProperty}
+        onSelectArea={handleSelectArea}
+        onRefreshProperties={loadUserProperties}
+        onLoadPastScan={handleLoadPastScan}
+        onShowToast={(msg) => {
+          setUpdateToast(msg);
+          setTimeout(() => setUpdateToast(""), 4500);
+        }}
+      />
 
       {/* Floating Status Toast */}
       {updateToast && <div className="update-toast">✅ {updateToast}</div>}

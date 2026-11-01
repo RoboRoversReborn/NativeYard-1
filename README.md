@@ -132,14 +132,25 @@ LandscapingApp/
    ```
 
 3. **Configure Environment Variables:**
-   Create a `.env.local` file inside the `web/` folder:
+   Create a `.env.local` file inside the `web/` folder (or copy from `.env.example`):
    ```env
+   # Google Gemini Vision
    GEMINI_API_KEY=your_gemini_api_key_here
    GEMINI_MODEL=gemini-2.5-flash
+
+   # Supabase & Google Authentication (https://supabase.com)
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+   # (Optional) Pl@ntNet API Key
    PLANTNET_API_KEY=your_optional_plantnet_key_here
    ```
 
-4. **Start the local development server:**
+4. **Initialize Database Schema:**
+   - In your Supabase Dashboard, open the **SQL Editor**.
+   - Copy and run the SQL commands from [`supabase/schema.sql`](file:///Users/niravgadhia/LandscapingApp/supabase/schema.sql) to create the `profiles`, `properties`, `yard_areas`, `yard_scans` tables and image storage bucket.
+
+5. **Start the local development server:**
    ```bash
    npm run dev
    ```
@@ -175,8 +186,13 @@ NativeYard can be deployed for free on major serverless hosting providers:
 1. Push your code to GitHub.
 2. Import the repository on [Vercel](https://vercel.com).
 3. Set the **Root Directory** to `web`.
-4. Add the environment variable `GEMINI_API_KEY` in the project settings.
-5. Deploy.
+4. Add the following **Environment Variables** in project settings:
+   - `GEMINI_API_KEY`: Your Google AI Studio API key.
+   - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase Project URL (`https://your-id.supabase.co`).
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase Anon Public key.
+5. In **Google Cloud Console → Credentials → Authorized Redirect URIs**, add your Supabase callback:
+   - `https://<your-project-id>.supabase.co/auth/v1/callback`
+6. Deploy!
 
 ### Other Hosting Platforms
 * **Render**: Web Service using Node environment (`cd web && npm install && npm run build`).
