@@ -288,6 +288,12 @@ export default function Home() {
 
     const updatedPlants = plants.map((p, idx) => {
       if (p.id === macroPlant.id) {
+        const confirmedStatus = (candidate.status && candidate.status !== "unknown")
+          ? candidate.status
+          : (candidate.styling?.type && candidate.styling.type !== "unknown")
+          ? candidate.styling.type
+          : "native";
+
         return enrichPlant(
           {
             ...p,
@@ -296,6 +302,8 @@ export default function Home() {
             kind: p.kind,
             source: "macro_leaf_match",
             confidence: candidate.confidence || 0.98,
+            status: confirmedStatus,
+            styling: candidate.styling,
           },
           idx
         );

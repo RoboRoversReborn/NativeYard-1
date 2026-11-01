@@ -117,15 +117,17 @@ export async function POST(req) {
       const substitutes = classification.substitutes || [];
       const image = getPlantImage(cand.sci, cand.common);
 
+      const verifiedStatus = status !== "unknown" ? status : "non_native";
+
       return {
         sci: cand.sci,
         common: cand.common || entry?.common || cand.sci,
         confidence: cand.confidence,
-        status: status,
+        status: verifiedStatus,
         isKeystone: isKeystone,
         styling: {
-          type: status === "invasive" ? "invasive" : status === "non_native" ? "non_native" : "native",
-          badge: isKeystone ? "Keystone Native" : status === "native" ? "Native" : status === "invasive" ? "Invasive" : "Non-Native",
+          type: verifiedStatus === "invasive" ? "invasive" : verifiedStatus === "non_native" ? "non_native" : "native",
+          badge: isKeystone ? "Keystone Native" : verifiedStatus === "native" ? "Native" : verifiedStatus === "invasive" ? "Invasive" : "Non-Native",
         },
         caterpillarHosts,
         visualDistinction: cand.visualDistinction,

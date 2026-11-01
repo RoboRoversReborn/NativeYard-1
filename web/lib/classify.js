@@ -188,7 +188,16 @@ export const COLOR_MAP = {
 
 export function enrichPlant(raw, index) {
   const c = classify(raw.sci || raw.guessScientific || "");
-  const status = c.status;
+  // Prioritize explicitly confirmed/verified status from user selection or macro match
+  let status = (raw.status && raw.status !== "unknown") ? raw.status : c.status;
+
+  // If user verified via manual selection or macro match, ensure it is assigned a concrete verified status
+  if ((!status || status === "unknown") && (raw.source === "manual_selection" || raw.source === "macro_leaf_match")) {
+    status = raw.styling?.type || "non_native";
+  }
+  if (!status) status = "unknown";
+
+  const isKeystone = status === "keystone" || (status === "native" && c.keystone);
   const styling = COLOR_MAP[status] || COLOR_MAP.unknown;
 
   return {
@@ -203,10 +212,10 @@ export function enrichPlant(raw, index) {
     organ: raw.organ || "leaf",
     status,
     styling,
-    isKeystone: c.keystone,
+    isKeystone,
     genus: c.genus,
     caterpillarHosts: c.caterpillarHosts,
-    note: c.note,
+    note: raw.note || c.note,
     substitutes: c.substitutes || []
   };
 }
