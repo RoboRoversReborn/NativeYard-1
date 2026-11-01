@@ -48,9 +48,12 @@ export async function detectPlants(imageBuffer, mimeType = "image/jpeg", customA
   const candidates = Array.from(
     new Set([
       process.env.GEMINI_MODEL,
-      "gemini-flash-lite-latest",
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.6-flash",
       "gemini-3.8-flash",
       "gemini-flash-latest",
+      "gemini-flash-lite-latest",
     ].filter(Boolean))
   );
 
@@ -173,9 +176,12 @@ export async function identifyMacroLeaf(imageBuffer, mimeType = "image/jpeg", cu
   const candidates = Array.from(
     new Set([
       process.env.GEMINI_MODEL,
-      "gemini-flash-lite-latest",
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.6-flash",
       "gemini-3.8-flash",
       "gemini-flash-latest",
+      "gemini-flash-lite-latest",
     ].filter(Boolean))
   );
 

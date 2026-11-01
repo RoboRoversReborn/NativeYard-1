@@ -65,7 +65,13 @@ export async function POST(req) {
 }
 
 async function processUploadedBuffer(fullImageBuffer, mimeType, customGeminiKey = null, customPlantnetKey = null) {
-  const metadata = await sharp(fullImageBuffer).metadata();
+  // Auto-orient based on EXIF (crucial for mobile/iPhone cameras)
+  const orientedBuffer = await sharp(fullImageBuffer)
+    .rotate()
+    .jpeg({ quality: 90 })
+    .toBuffer();
+
+  const metadata = await sharp(orientedBuffer).metadata();
   const width = metadata.width || 1200;
   const height = metadata.height || 900;
 
@@ -78,7 +84,7 @@ async function processUploadedBuffer(fullImageBuffer, mimeType, customGeminiKey 
   if (hasGeminiKey) {
     try {
       // Downscale to max 1280px for fast vision detection while keeping sharp resolution for crops
-      const geminiImageBuffer = await sharp(fullImageBuffer)
+      const geminiImageBuffer = await sharp(orientedBuffer)
         .resize({ width: 1280, height: 1280, fit: "inside", withoutEnlargement: true })
         .jpeg({ quality: 80 })
         .toBuffer();
@@ -119,7 +125,7 @@ async function processUploadedBuffer(fullImageBuffer, mimeType, customGeminiKey 
           const cropH = Math.min(height - top, Math.round(((ymax - ymin) / 1000) * height));
 
           if (cropW > 40 && cropH > 40) {
-            const cropBuffer = await sharp(fullImageBuffer)
+            const cropBuffer = await sharp(orientedBuffer)
               .extract({ left, top, width: cropW, height: cropH })
               .jpeg({ quality: 85 })
               .toBuffer();
@@ -154,7 +160,7 @@ async function processUploadedBuffer(fullImageBuffer, mimeType, customGeminiKey 
   );
 
   const scoreReport = computeScore(analyzedPlants);
-  const dataUrl = `data:${mimeType};base64,${fullImageBuffer.toString("base64")}`;
+  const dataUrl = `data:image/jpeg;base64,${orientedBuffer.toString("base64")}`;
 
   return Response.json({
     success: true,

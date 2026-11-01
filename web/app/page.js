@@ -5,7 +5,7 @@ import { PLANTS } from "@/lib/njPlants";
 import { enrichPlant, computeScore, COLOR_MAP } from "@/lib/classify";
 import { getPlantImage } from "@/lib/plantImages";
 import LiveCameraModal from "@/components/LiveCameraModal";
-import { isMobileOrTablet } from "@/lib/camera";
+import { isMobileOrTablet, compressImageFile } from "@/lib/camera";
 import { createClient } from "@/lib/supabase/client";
 import PropertyBar from "@/components/PropertyBar";
 import PropertyManagerModal from "@/components/PropertyManagerModal";
@@ -348,6 +348,34 @@ export default function Home() {
     }
   };
 
+  // Safe API fetcher: handles non-JSON (HTML 413, 500, 504) without triggering Safari's "The string did not match the expected pattern" SyntaxError
+  const safeFetchApi = async (url, options) => {
+    const res = await fetch(url, options);
+    const contentType = res.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `Server error (${res.status})`);
+      }
+      return data;
+    }
+
+    // Server returned HTML or plain text error
+    const rawText = await res.text().catch(() => "");
+    if (res.status === 413) {
+      throw new Error("Photo exceeds server upload limits. Image has been automatically optimized, please try again.");
+    }
+    if (res.status === 504 || res.status === 502) {
+      throw new Error("Analysis timed out. Please try a clearer daytime photo of your garden bed.");
+    }
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}: ${rawText.slice(0, 150) || res.statusText || "Request failed"}`);
+    }
+
+    throw new Error("Unexpected response format from server. Please try again.");
+  };
+
   // Process yard photo (from either file upload or live camera capture)
   const processYardPhoto = async (file) => {
     if (!file) return;
@@ -358,30 +386,30 @@ export default function Home() {
       setSelectedSample(null);
       setSelectedPlantId(null);
 
+      // Client-side compression & standard JPEG conversion (protects against iPhone HEIC and Vercel 4.5MB limits)
+      const compressedFile = await compressImageFile(file, 1600, 0.85);
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", compressedFile);
 
       const headers = {};
-      if (geminiKey) {
-        headers["x-gemini-api-key"] = geminiKey;
+      if (geminiKey && geminiKey.trim()) {
+        headers["x-gemini-api-key"] = geminiKey.trim();
       }
 
-      const res = await fetch("/api/analyze", {
+      const data = await safeFetchApi("/api/analyze", {
         method: "POST",
         headers,
         body: formData,
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to analyze photo");
 
       setAnalysisData(data);
       if (data.plants?.length > 0) {
         setSelectedPlantId(data.plants[0].id);
       }
     } catch (err) {
-      console.error(err);
-      setErrorMsg(err.message);
+      console.error("Yard analysis error:", err);
+      setErrorMsg(err.message || "Failed to analyze photo");
     } finally {
       setLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -460,28 +488,28 @@ export default function Home() {
   const processMacroPhoto = async (file, targetPlant = macroPlant) => {
     if (!file || !targetPlant) return;
 
-    const userImageUrl = URL.createObjectURL(file);
     try {
       setMacroAnalyzing(true);
       setErrorMsg("");
 
+      // Client-side compression for close-up photo
+      const compressedFile = await compressImageFile(file, 1200, 0.88);
+      const userImageUrl = URL.createObjectURL(compressedFile);
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", compressedFile);
       formData.append("hint", targetPlant.common || targetPlant.kind || "");
 
       const headers = {};
-      if (geminiKey) {
-        headers["x-gemini-api-key"] = geminiKey;
+      if (geminiKey && geminiKey.trim()) {
+        headers["x-gemini-api-key"] = geminiKey.trim();
       }
 
-      const res = await fetch("/api/identify-macro", {
+      const data = await safeFetchApi("/api/identify-macro", {
         method: "POST",
         headers,
         body: formData,
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to analyze close-up photo");
 
       setMacroResult({
         userImageUrl,
@@ -490,8 +518,8 @@ export default function Home() {
       });
       setMatchingPlant(null);
     } catch (err) {
-      console.error(err);
-      setErrorMsg(err.message);
+      console.error("Macro analysis error:", err);
+      setErrorMsg(err.message || "Failed to analyze close-up photo");
     } finally {
       setMacroAnalyzing(false);
       if (macroInputRef.current) macroInputRef.current.value = "";
