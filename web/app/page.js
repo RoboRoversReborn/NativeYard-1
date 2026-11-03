@@ -580,8 +580,8 @@ export default function Home() {
         const confirmedStatus = (candidate.status && candidate.status !== "unknown")
           ? candidate.status
           : (candidate.styling?.type && candidate.styling.type !== "unknown")
-          ? candidate.styling.type
-          : "native";
+            ? candidate.styling.type
+            : "native";
 
         return enrichPlant(
           {
@@ -1020,9 +1020,8 @@ export default function Home() {
                                   {item.sci} • {item.type}
                                 </div>
                                 <span
-                                  className={`plant-badge ${
-                                    isInvasive ? "invasive" : isNative ? "native" : "non-native"
-                                  }`}
+                                  className={`plant-badge ${isInvasive ? "invasive" : isNative ? "native" : "non-native"
+                                    }`}
                                   style={{
                                     fontSize: "10px",
                                     padding: "2px 6px",
@@ -1033,10 +1032,10 @@ export default function Home() {
                                   {isInvasive
                                     ? "Invasive (Red)"
                                     : item.status === "keystone"
-                                    ? "Keystone Native (Green)"
-                                    : isNative
-                                    ? "Native (Green)"
-                                    : "Non-native (Orange)"}
+                                      ? "Keystone Native (Green)"
+                                      : isNative
+                                        ? "Native (Green)"
+                                        : "Non-native (Orange)"}
                                 </span>
                               </div>
                             </button>
@@ -1168,17 +1167,16 @@ export default function Home() {
                             </span>
                           )}
                           <span
-                            className={`plant-badge ${
-                              isInvasive ? "invasive" : isNative ? "native" : "non-native"
-                            }`}
+                            className={`plant-badge ${isInvasive ? "invasive" : isNative ? "native" : "non-native"
+                              }`}
                           >
                             {isInvasive
                               ? "Invasive"
                               : item.status === "keystone"
-                              ? "Keystone Native"
-                              : isNative
-                              ? "Native"
-                              : "Non-Native"}
+                                ? "Keystone Native"
+                                : isNative
+                                  ? "Native"
+                                  : "Non-Native"}
                           </span>
                         </div>
                       </button>
@@ -1394,9 +1392,8 @@ export default function Home() {
                                 {cand.common}
                               </span>
                               <span
-                                className={`plant-badge ${
-                                  isInvasive ? "invasive" : isNative ? "native" : "non-native"
-                                }`}
+                                className={`plant-badge ${isInvasive ? "invasive" : isNative ? "native" : "non-native"
+                                  }`}
                               >
                                 {cand.styling?.badge || cand.status}
                               </span>
@@ -1751,19 +1748,19 @@ export default function Home() {
                       plant.status === "unknown"
                         ? "border-unknown"
                         : plant.styling?.type === "native"
-                        ? "border-native"
-                        : plant.styling?.type === "non_native"
-                        ? "border-nonnative"
-                        : "border-invasive";
+                          ? "border-native"
+                          : plant.styling?.type === "non_native"
+                            ? "border-nonnative"
+                            : "border-invasive";
 
                     const badgeClass =
                       plant.status === "unknown"
                         ? "unknown"
                         : plant.styling?.type === "native"
-                        ? "native"
-                        : plant.styling?.type === "non_native"
-                        ? "non-native"
-                        : "invasive";
+                          ? "native"
+                          : plant.styling?.type === "non_native"
+                            ? "non-native"
+                            : "invasive";
 
                     return (
                       <div

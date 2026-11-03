@@ -23,6 +23,7 @@ node_modules/
 out/
 build/
 dist/
+web2/
 
 # Vercel
 .vercel

@@ -148,3 +148,46 @@ create policy "Users Can Delete Own Yard Photos"
     bucket_id = 'yard-photos' 
     and auth.uid()::text = (storage.foldername(name))[1]
   );
+
+
+-- 6. Unified Plants Table (Curated New Jersey Flora Database)
+create table if not exists public.plants (
+  id text primary key,
+  scientific_name text not null unique,
+  common_name text not null,
+  synonyms text[] default '{}',
+  status text not null,
+  nj_status text not null,
+  type text not null,
+  growth_habit text,
+  sun text default 'Full Sun / Partial Shade',
+  moisture text default 'Medium',
+  bloom text default 'Summer',
+  height text default '2–6 ft',
+  lepidoptera integer default 0,
+  specialist_bee_support boolean default false,
+  deer_resistance text default 'MODERATE',
+  description text,
+  image_url text,
+  swap_plant_ids text[] default '{}',
+  removal jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.plants enable row level security;
+
+-- Public can read all plants
+create policy "Anyone can read plants catalog"
+  on public.plants for select
+  using (true);
+
+-- Authenticated curators can insert and update plants
+create policy "Authenticated users can insert plants"
+  on public.plants for insert
+  with check (auth.role() = 'authenticated');
+
+create policy "Authenticated users can update plants"
+  on public.plants for update
+  using (auth.role() = 'authenticated');
+
