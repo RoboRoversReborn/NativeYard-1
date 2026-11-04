@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-forest: #163f2c;
-  --color-moss: #5d8153;
+  --color-forest: #143424;
+  --color-moss: #55794c;
   --color-lime: #d7f27a;
-  --color-cream: #f7f4e9;
-  --color-sand: #ede7d5;
-  --color-ink: #1d2a21;
+  --color-cream: #faf9f5;
+  --color-sand: #ede9dc;
+  --color-ink: #18231c;
   --color-clay: #b6533d;
   --color-gold: #a87a2c;
   --font-sans: var(--font-dm-sans);
@@ -15,8 +15,8 @@
 
 @layer base {
   :root {
-    --background: #f7f4e9;
-    --foreground: #1d2a21;
+    --background: #faf9f5;
+    --foreground: #18231c;
   }
 
   * {
@@ -146,17 +146,9 @@
     position: sticky;
     top: 0;
     z-index: 40;
-    border-bottom: 1px solid rgba(213, 207, 189, 0.8);
-    background: rgba(247, 244, 233, 0.9);
+    border-bottom: 1px solid rgba(226, 222, 209, 0.85);
+    background: rgba(250, 249, 245, 0.92);
     backdrop-filter: blur(16px);
-  }
-
-  .app-header {
-    background: rgba(244, 241, 230, 0.92);
-  }
-
-  .report-toolbar {
-    background: rgba(233, 229, 215, 0.94);
   }
 
   .nav-link {

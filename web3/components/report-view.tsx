@@ -24,8 +24,8 @@ import {
   TreePine,
   Waves,
 } from "lucide-react";
+import { AppHeader } from "./AppHeader";
 import { Brand } from "./brand";
-import { HeaderAuth } from "./header-auth";
 import { ScoreRing } from "./score-ring";
 import { StatusBadge } from "./status-badge";
 import {
@@ -212,79 +212,19 @@ export function ReportView({
   }
 
   return (
-    <div className="min-h-screen bg-[#e9e5d7] text-[#1d2a21]">
-      <header className="report-toolbar no-print">
-        <div className="container-shell flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button type="button" onClick={onHome} aria-label="Back to home">
-              <Brand />
-            </button>
-            <span className="hidden h-5 w-px bg-[#d0cbb9] sm:block" />
-            <button
-              type="button"
-              onClick={onBack}
-              className="hidden items-center gap-1.5 text-[0.72rem] font-bold text-[#5d6b60] transition hover:text-[#163f2c] sm:inline-flex"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Back to audit
-            </button>
-            <a
-              href="/admin/plants"
-              className="hidden lg:inline-flex items-center gap-1 text-[0.76rem] font-bold text-[#2f7d3a] hover:text-[#163f2c]"
-            >
-              <span>🌿</span>
-              <span>Flora Database</span>
-            </a>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onReset}
-              className="hidden rounded-full border border-[#d8d3bf] bg-[#fbfaf4] px-3.5 py-2 text-[0.72rem] font-bold text-[#5d6b60] transition hover:border-[#b9b4a2] hover:text-[#163f2c] sm:inline-flex"
-            >
-              Start over
-            </button>
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={isGeneratingPdf}
-              className="btn btn-dark px-4 py-2 text-[0.72rem] disabled:opacity-60 flex items-center gap-1.5"
-            >
-              {isGeneratingPdf ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-[#d7f27a]" />
-                  Generating PDF...
-                </>
-              ) : (
-                <>
-                  <Download className="h-3.5 w-3.5" />
-                  Download PDF
-                </>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] px-3 py-2 text-[0.72rem] font-bold text-[#5d6b60] transition hover:border-[#b9b4a2] hover:text-[#163f2c]"
-              title="Open browser print dialog"
-            >
-              <Printer className="h-3.5 w-3.5" />
-              Print
-            </button>
-            <div className="border-l border-[#d0cbb9] pl-2 ml-1">
-              <HeaderAuth
-                user={user}
-                onOpenAuth={onOpenAuth}
-                onSignOut={onSignOut}
-                onOpenPropertyManager={onOpenPropertyManager}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="container-shell pb-2 text-right text-[0.62rem] text-[#8b9182] sm:hidden">
-          Tap &ldquo;Download PDF&rdquo; to save PDF report file directly.
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#faf9f5] text-[#18231c]">
+      <AppHeader
+        stage="report"
+        user={user}
+        onHome={onHome}
+        onReset={onReset}
+        onBackToAudit={onBack}
+        onDownloadPdf={handleDownloadPdf}
+        isGeneratingPdf={isGeneratingPdf}
+        onOpenAuth={onOpenAuth}
+        onSignOut={onSignOut}
+        onOpenPropertyManager={onOpenPropertyManager}
+      />
 
       <main className="report-wrap container-shell py-7 sm:py-10">
         <article ref={reportRef} className="report-paper">

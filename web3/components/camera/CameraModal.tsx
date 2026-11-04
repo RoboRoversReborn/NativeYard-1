@@ -1,14 +1,16 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import { Camera, RefreshCw, Check, X, AlertTriangle, Video } from "lucide-react";
 
-type CameraModalProps = {
+export type CameraModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onCapture: (file: File) => void;
   title?: string;
   subTitle?: string;
+  facingMode?: "user" | "environment";
 };
 
 export function CameraModal({
@@ -17,6 +19,7 @@ export function CameraModal({
   onCapture,
   title = "Live Yard Viewfinder",
   subTitle = "Position your camera to capture the garden bed and click shutter",
+  facingMode = "environment",
 }: CameraModalProps) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
@@ -61,7 +64,7 @@ export function CameraModal({
 
       const videoConstraints: MediaTrackConstraints = deviceId
         ? { deviceId: { exact: deviceId } }
-        : { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } };
+        : { facingMode: { ideal: facingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } };
 
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: videoConstraints,
@@ -156,7 +159,7 @@ export function CameraModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-[#ede7d5] bg-[#fbfaf4] shadow-2xl"
+        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-[#ede7d5] bg-[#faf9f5] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -173,96 +176,97 @@ export function CameraModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1 text-[#8b9182] hover:bg-[#ede7d5] hover:text-[#163f2c]"
+            className="rounded-full p-1.5 text-[#8b9182] hover:bg-[#ede7d5] hover:text-[#163f2c] transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Viewfinder Body */}
-        <div className="relative aspect-video w-full bg-black overflow-hidden flex items-center justify-center">
+        {/* Viewfinder Area */}
+        <div className="relative aspect-4/3 w-full bg-black flex items-center justify-center overflow-hidden">
           {errorMsg ? (
-            <div className="p-6 text-center text-white max-w-md">
-              <AlertTriangle className="h-10 w-10 text-[#b6533d] mx-auto mb-2" />
-              <h4 className="font-bold text-sm mb-1">Camera Unavailable</h4>
-              <p className="text-xs text-white/70">{errorMsg}</p>
+            <div className="flex flex-col items-center gap-2 text-center p-6 text-red-200">
+              <AlertTriangle className="h-8 w-8 text-red-400" />
+              <p className="text-xs max-w-sm">{errorMsg}</p>
             </div>
           ) : capturedPreview ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={capturedPreview}
-              alt="Snapshot preview"
+              alt="Snapshot Preview"
               className="h-full w-full object-contain"
             />
           ) : (
-            <>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="h-full w-full object-cover"
-              />
-              {/* Subtle alignment crosshair */}
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="h-48 w-72 rounded-2xl border-2 border-white/30" />
-              </div>
-            </>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="h-full w-full object-cover"
+            />
           )}
 
+          {/* Hidden Canvas for captures */}
           <canvas ref={canvasRef} className="hidden" />
+
+          {/* Flash indicator */}
+          {!capturedPreview && !errorMsg && (
+            <div className="pointer-events-none absolute inset-0 border border-white/20 rounded-lg m-4" />
+          )}
         </div>
 
         {/* Footer Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#ede7d5] bg-white px-5 py-3.5">
-          {devices.length > 1 && !capturedBlob && (
-            <div className="flex items-center gap-2 text-xs text-[#163f2c]">
-              <Video className="h-3.5 w-3.5" />
-              <select
-                value={selectedDeviceId}
-                onChange={(e) => setSelectedDeviceId(e.target.value)}
-                className="rounded-lg border border-[#ede7d5] bg-[#fbfaf4] px-2 py-1 text-xs text-[#163f2c] focus:outline-none"
-              >
-                {devices.map((device, idx) => (
-                  <option key={device.deviceId || idx} value={device.deviceId}>
-                    {device.label || `Camera ${idx + 1}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+        <div className="flex items-center justify-between border-t border-[#ede7d5] px-5 py-3.5 bg-white">
+          {/* Device Selector */}
+          <div className="flex items-center gap-2">
+            {devices.length > 1 && !capturedPreview && (
+              <div className="flex items-center gap-1.5 text-xs text-[#163f2c]">
+                <Video className="h-3.5 w-3.5 text-[#3f7d45]" />
+                <select
+                  value={selectedDeviceId}
+                  onChange={(e) => setSelectedDeviceId(e.target.value)}
+                  className="rounded-lg border border-[#ede7d5] bg-[#faf9f5] py-1 px-2 text-xs font-semibold focus:outline-hidden"
+                >
+                  {devices.map((device, idx) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label || `Camera ${idx + 1}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
 
-          <div className="flex items-center gap-2 ml-auto">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3">
             {capturedPreview ? (
               <>
                 <button
                   type="button"
                   onClick={handleRetake}
-                  className="btn bg-[#ede7d5] text-[#163f2c] hover:bg-[#e0d8bf]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#ede7d5] bg-white px-4 py-2 text-xs font-bold text-[#5d6b60] hover:bg-[#ede7d5] transition"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
-                  Retake Photo
+                  Retake
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  className="btn bg-[#163f2c] text-[#d7f27a] hover:bg-[#1e4d37]"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#163f2c] px-5 py-2 text-xs font-bold text-[#faf9f5] hover:bg-[#20523a] transition"
                 >
                   <Check className="h-3.5 w-3.5" />
-                  Audit This Photo ↗
+                  Use Photo
                 </button>
               </>
             ) : (
-              !errorMsg && (
-                <button
-                  type="button"
-                  onClick={takeSnapshot}
-                  className="btn bg-[#163f2c] text-[#d7f27a] font-bold px-6 py-2.5 text-sm hover:bg-[#1e4d37] shadow-md"
-                >
-                  <Camera className="h-4 w-4" />
-                  Take Snapshot
-                </button>
-              )
+              <button
+                type="button"
+                onClick={takeSnapshot}
+                disabled={Boolean(errorMsg)}
+                className="inline-flex items-center gap-2 rounded-full bg-[#163f2c] px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-[#20523a] transition disabled:opacity-50"
+              >
+                <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+                Capture Photo
+              </button>
             )}
           </div>
         </div>
@@ -270,3 +274,6 @@ export function CameraModal({
     </div>
   );
 }
+
+// Named alias for backwards compatibility
+export const LiveCameraModal = CameraModal;

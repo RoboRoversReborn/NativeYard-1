@@ -2,8 +2,7 @@
 "use client";
 
 import { Check, Loader2, ScanLine, Sparkles } from "lucide-react";
-import { Brand } from "./brand";
-import { HeaderAuth } from "./header-auth";
+import { AppHeader } from "./AppHeader";
 
 const STEPS = [
   "Detecting plant forms",
@@ -28,35 +27,14 @@ export function AnalyzingView({
   onOpenPropertyManager?: () => void;
 }) {
   return (
-    <div className="min-h-screen bg-[#f7f4e9] text-[#1d2a21]">
-      <header className="site-header no-print">
-        <div className="container-shell flex h-[4.5rem] items-center justify-between gap-4">
-          <div className="flex items-center gap-5">
-            <Brand />
-            <a
-              className="nav-link hidden lg:flex items-center gap-1 font-bold text-[#2f7d3a] hover:text-[#163f2c] text-xs"
-              href="/admin/plants"
-            >
-              <span>🌿</span>
-              <span>Flora Database</span>
-            </a>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-[0.1em] text-[#5d6b60]">
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-[#3f7d45]" />
-              Analyzing
-            </span>
-            <div className="border-l border-[#d8d3bf] pl-2">
-              <HeaderAuth
-                user={user}
-                onOpenAuth={onOpenAuth}
-                onSignOut={onSignOut}
-                onOpenPropertyManager={onOpenPropertyManager}
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#faf9f5] text-[#18231c]">
+      <AppHeader
+        stage="analyzing"
+        user={user}
+        onOpenAuth={onOpenAuth}
+        onSignOut={onSignOut}
+        onOpenPropertyManager={onOpenPropertyManager}
+      />
 
       <main className="container-shell grid min-h-[calc(100vh-4.5rem)] items-center gap-10 py-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         <div className="max-w-[31rem]">

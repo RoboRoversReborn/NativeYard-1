@@ -56,7 +56,7 @@ export function PropertyBar({
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   return (
-    <div className="no-print w-full border-b border-[#ede7d5] bg-[#fbfaf4]/95 backdrop-blur-md sticky top-[4.5rem] z-30 transition-all">
+    <div className="no-print w-full border-b border-[#e2dec9] bg-[#faf9f5]/95 backdrop-blur-md sticky top-14 sm:top-16 z-30 transition-all">
       <div className="container-shell flex flex-wrap items-center justify-between gap-3 py-2.5">
         {/* Left: Property & Area Selector */}
         <div className="flex flex-wrap items-center gap-2">

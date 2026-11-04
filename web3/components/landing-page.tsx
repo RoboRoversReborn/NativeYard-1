@@ -25,8 +25,8 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { AppHeader } from "./AppHeader";
 import { Brand } from "./brand";
-import { HeaderAuth } from "./header-auth";
 import { StatusBadge } from "./status-badge";
 import {
   buildSamplePreview,
@@ -110,58 +110,14 @@ export function LandingPage({
   };
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-[#f7f4e9] text-[#1d2a21]">
-      <header className="site-header no-print">
-        <div className="container-shell flex h-[4.5rem] items-center justify-between gap-4">
-          <Brand />
-          <nav className="hidden items-center gap-7 text-[0.84rem] font-semibold text-[#425445] lg:flex">
-            <a className="nav-link" href="#how-it-works">
-              How it works
-            </a>
-            <a className="nav-link" href="#verdicts">
-              Plant verdicts
-            </a>
-            <a className="nav-link" href="#keystone">
-              Why native
-            </a>
-            <a className="nav-link" href="#audit">
-              The report
-            </a>
-            <a className="nav-link flex items-center gap-1 font-bold text-[#2f7d3a] hover:text-[#163f2c]" href="/admin/plants">
-              <span>🌿</span>
-              <span>Flora Database</span>
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-2.5">
-            <HeaderAuth
-              user={user}
-              onOpenAuth={onOpenAuth}
-              onSignOut={onSignOut}
-              onOpenPropertyManager={onOpenPropertyManager}
-            />
-
-            {!user && (
-              <>
-                <a
-                  href="#audit"
-                  className="btn btn-dark hidden text-[0.78rem] sm:inline-flex"
-                >
-                  Start free audit
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </a>
-                <a
-                  href="#audit"
-                  className="btn btn-dark text-[0.76rem] sm:hidden"
-                >
-                  Start audit
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </a>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen overflow-x-clip bg-[#faf9f5] text-[#18231c]">
+      <AppHeader
+        stage="landing"
+        user={user}
+        onOpenAuth={onOpenAuth}
+        onSignOut={onSignOut}
+        onOpenPropertyManager={onOpenPropertyManager}
+      />
 
       <main>
         <section className="hero" id="top">

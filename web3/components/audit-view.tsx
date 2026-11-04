@@ -24,12 +24,11 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { Brand } from "./brand";
-import { HeaderAuth } from "./header-auth";
+import { AppHeader } from "./AppHeader";
 import { ScoreRing } from "./score-ring";
 import { StatusBadge } from "./status-badge";
 import { BoundingBoxOverlay } from "./canvas/BoundingBoxOverlay";
-import { LiveCameraModal } from "./LiveCameraModal";
+import { LiveCameraModal } from "@/components/camera/CameraModal";
 import { PlantPickerModal } from "./PlantPickerModal";
 import { MacroLeafMatcherModal } from "./MacroLeafMatcherModal";
 import {
@@ -344,72 +343,17 @@ export function AuditView({
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f1e6] text-[#1d2a21]">
-      <header className="site-header no-print">
-        <div className="container-shell flex h-[4.5rem] items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
-            <button type="button" onClick={onHome} aria-label="Back to NativeYard home">
-              <Brand />
-            </button>
-            <nav className="hidden items-center gap-5 text-[0.84rem] font-semibold text-[#425445] lg:flex">
-              <a
-                className="nav-link flex items-center gap-1 font-bold text-[#2f7d3a] hover:text-[#163f2c]"
-                href="/admin/plants"
-              >
-                <span>🌿</span>
-                <span>Flora Database</span>
-              </a>
-            </nav>
-          </div>
-
-          <div className="hidden items-center gap-1 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] p-1 text-[0.68rem] font-bold md:flex">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[#7a806e]">
-              <Check className="h-3.5 w-3.5 text-[#3f7d45]" />
-              Photo
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#163f2c] px-3 py-1.5 text-[#f7f4e9]">
-              <ScanLine className="h-3.5 w-3.5 text-[#d7f27a]" />
-              Yard audit
-            </span>
-            <button
-              type="button"
-              onClick={onReport}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[#5d6b60] hover:text-[#163f2c] transition"
-            >
-              <FileText className="h-3.5 w-3.5" />
-              Report
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={onReset}
-              className="hidden items-center gap-1.5 rounded-full border border-[#d8d3bf] bg-white px-3 py-1.5 text-xs font-bold text-[#5d6b60] transition hover:bg-[#ece8d9] hover:text-[#163f2c] sm:inline-flex"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              New audit
-            </button>
-            <button
-              type="button"
-              onClick={onReport}
-              className="btn btn-dark px-3.5 py-1.5 text-xs font-bold"
-            >
-              View report
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-
-            <div className="border-l border-[#d8d3bf] pl-2.5 ml-1">
-              <HeaderAuth
-                user={user}
-                onOpenAuth={onOpenAuth}
-                onSignOut={onSignOut}
-                onOpenPropertyManager={onOpenPropertyManager}
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#faf9f5] text-[#18231c]">
+      <AppHeader
+        stage="audit"
+        user={user}
+        onHome={onHome}
+        onReset={onReset}
+        onReport={onReport}
+        onOpenAuth={onOpenAuth}
+        onSignOut={onSignOut}
+        onOpenPropertyManager={onOpenPropertyManager}
+      />
 
       {propertyBar}
 
@@ -1225,9 +1169,34 @@ export function AuditView({
         </div>
       )}
 
+      {/* Sticky Mobile Summary Action Pill */}
+      <div className="md:hidden fixed bottom-4 inset-x-4 z-40 flex items-center justify-between gap-3 rounded-full border border-[#143424]/20 bg-[#143424]/95 px-4 py-2 text-white shadow-2xl backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-[#d7f27a] text-xs font-black text-[#143424]">
+            {audit.score}
+          </span>
+          <div className="text-left">
+            <p className="text-[11px] font-bold leading-tight text-[#faf9f5]">
+              Score {audit.score} · {audit.scoreLabel}
+            </p>
+            <p className="text-[9px] text-[#a5b89a]">
+              {audit.detections.length} plants in frame
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onReport}
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#d7f27a] px-3.5 py-1.5 text-xs font-black text-[#143424] shadow-xs active:scale-95 transition"
+        >
+          <span>Report</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-[#2f7d3a] bg-[#163f2c] px-5 py-2.5 text-xs font-bold text-[#f7f4e9] shadow-xl animate-fade-in">
+        <div className="fixed bottom-16 md:bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-[#2f7d3a] bg-[#163f2c] px-5 py-2.5 text-xs font-bold text-[#faf9f5] shadow-xl animate-fade-in">
           <Check className="h-4 w-4 text-[#d7f27a]" />
           <span>{toastMessage}</span>
         </div>
