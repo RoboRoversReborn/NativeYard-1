@@ -4,6 +4,7 @@
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import {
+  AlertTriangle,
   ArrowRight,
   ArrowUpRight,
   Bird,
@@ -11,6 +12,7 @@ import {
   Camera,
   Check,
   ChevronRight,
+  Droplets,
   FileText,
   Flower2,
   Home,
@@ -18,6 +20,7 @@ import {
   LogIn,
   MapPin,
   ScanLine,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
   TreePine,
@@ -568,87 +571,181 @@ export function LandingPage({
           </div>
         </section>
 
-        <section className="border-y border-[#ddd8c7] bg-[#f0ecdf]">
-          <div className="container-shell grid grid-cols-2 gap-x-6 gap-y-7 py-8 sm:grid-cols-4 sm:py-10">
-            {[
-              ["40M", "acres of lawn across the U.S."],
-              ["96%", "of land birds feed insects to young"],
-              ["500+", "caterpillar species on one white oak"],
-              ["1 photo", "to start your yard's transition"],
-            ].map(([stat, label]) => (
-              <div key={label}>
-                <p className="font-display text-[1.8rem] font-semibold tracking-[-0.04em] text-[#163f2c] sm:text-[2.2rem]">
-                  {stat}
-                </p>
-                <p className="mt-1 max-w-[12rem] text-[0.72rem] leading-5 text-[#6b7a68]">
-                  {label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section id="how-it-works" className="section-pad">
+        <section id="how-it-works" className="section-pad border-t border-[#e2dec9]">
           <div className="container-shell">
-            <div className="max-w-[42rem]">
-              <p className="eyebrow text-[#6b7a68]">How it works</p>
-              <h2 className="mt-3 font-display text-[clamp(2.4rem,4.4vw,3.7rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-[#163f2c]">
-                A yard audit in three acts.
+            <div className="text-center max-w-2xl mx-auto">
+              <p className="eyebrow text-[#2f7d3a]">Effortless 3-Step Process</p>
+              <h2 className="mt-2 font-display text-[clamp(2.2rem,4vw,3.2rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-[#143424]">
+                How NativeYard audits your yard.
               </h2>
-              <p className="mt-4 max-w-[35rem] text-[0.98rem] leading-7 text-[#5d6b60]">
-                No plant taxonomy degree required. NativeYard reads the photo,
-                matches species to your New Jersey physiographic province, and
-                turns the results into a plan you can actually do this weekend.
+              <p className="mt-3 text-sm sm:text-base text-[#5d6b60]">
+                No plant taxonomy degree needed. Upload any yard photo and let our vision engine do the heavy lifting in seconds.
               </p>
             </div>
 
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
-              {[
-                {
-                  step: "01",
-                  icon: Camera,
-                  title: "Snap your yard",
-                  copy: "Take one wide photo from a corner or upload a panorama. Include trees, hedges, beds, and the ground layer.",
-                  color: "#3f7d45",
-                },
-                {
-                  step: "02",
-                  icon: ScanLine,
-                  title: "Read the ecology",
-                  copy: "We tag each plant as a NJ keystone native, native, low-risk non-native, regulated invasive, or watchlist invasive—calibrated to your ZIP and physiographic province.",
-                  color: "#a87a2c",
-                },
-                {
-                  step: "03",
-                  icon: FileText,
-                  title: "Get the plan",
-                  copy: "Download a prioritized removal protocol and a 1-to-1 native swap blueprint, with planting windows and local nursery leads.",
-                  color: "#b6533d",
-                },
-              ].map((item) => (
-                <article
-                  key={item.step}
-                  className="group rounded-[1.6rem] border border-[#d9d4c4] bg-[#fbfaf4] p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(45,61,42,0.09)]"
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="grid h-11 w-11 place-items-center rounded-full"
-                      style={{ background: `${item.color}16`, color: item.color }}
-                    >
-                      <item.icon className="h-5 w-5" />
+            {/* 3-Step Interactive Visual Flow */}
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {/* Step 1: Point & Snap */}
+              <div className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-[#e2dec9] bg-white p-5 sm:p-6 shadow-xs hover:shadow-md transition duration-300">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#edf3e3] text-[#2f7d3a] font-black text-sm">
+                      01
                     </span>
-                    <span className="font-display text-[1.55rem] font-semibold text-[#d6d2c2]">
-                      {item.step}
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#faf9f5] border border-[#e2dec9] px-2.5 py-1 text-[11px] font-semibold text-[#5d6b60]">
+                      <Camera className="h-3.5 w-3.5 text-[#2f7d3a]" />
+                      Snap Photo
                     </span>
                   </div>
-                  <h3 className="mt-5 font-display text-[1.35rem] font-semibold tracking-[-0.03em] text-[#163f2c]">
-                    {item.title}
+
+                  {/* Visual Preview 1: Camera Viewfinder Mockup */}
+                  <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-[#e2dec9] bg-[#143424] mb-4">
+                    <img
+                      src="/samples/sample_yard_front_1793414504055.jpg"
+                      alt="Camera capture preview"
+                      className="h-full w-full object-cover opacity-85 group-hover:scale-105 transition duration-500"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="rounded-xl border border-white/40 bg-black/40 backdrop-blur-xs px-3 py-1.5 text-center">
+                        <p className="text-[11px] font-bold text-white flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full bg-[#d7f27a] animate-pulse" />
+                          Whole Yard Frame
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 className="font-display text-lg font-bold text-[#143424]">
+                    1. Snap your garden or bed
                   </h3>
-                  <p className="mt-2 text-[0.84rem] leading-6 text-[#667368]">
-                    {item.copy}
+                  <p className="mt-1.5 text-xs sm:text-sm text-[#5d6b60] leading-relaxed">
+                    Take a photo from your phone or choose an existing photo. Include trees, shrubs, and garden borders.
                   </p>
-                </article>
-              ))}
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[#f0ece1] flex items-center gap-1.5 text-xs font-semibold text-[#2f7d3a]">
+                  <Check className="h-3.5 w-3.5" />
+                  <span>Auto-detects perspective &amp; orientation</span>
+                </div>
+              </div>
+
+              {/* Step 2: AI Multi-Plant Detection */}
+              <div className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-[#e2dec9] bg-white p-5 sm:p-6 shadow-xs hover:shadow-md transition duration-300">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#edf3e3] text-[#2f7d3a] font-black text-sm">
+                      02
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#faf9f5] border border-[#e2dec9] px-2.5 py-1 text-[11px] font-semibold text-[#5d6b60]">
+                      <ScanLine className="h-3.5 w-3.5 text-[#2f7d3a]" />
+                      Vision AI
+                    </span>
+                  </div>
+
+                  {/* Visual Preview 2: Bounding Box Simulation */}
+                  <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-[#e2dec9] bg-[#143424] mb-4">
+                    <img
+                      src="/samples/sample_yard_back_1793414515592.jpg"
+                      alt="AI plant detection overlay"
+                      className="h-full w-full object-cover opacity-85 group-hover:scale-105 transition duration-500"
+                    />
+                    {/* Simulated Bounding Boxes */}
+                    <div className="absolute top-3 left-3 rounded-lg border-2 border-emerald-400 bg-emerald-950/80 px-2 py-0.5 text-[10px] font-bold text-emerald-200 shadow-md">
+                      #1 Highbush Blueberry · Keystone
+                    </div>
+                    <div className="absolute bottom-3 right-3 rounded-lg border-2 border-rose-500 bg-rose-950/85 px-2 py-0.5 text-[10px] font-bold text-rose-200 shadow-md">
+                      #2 Japanese Barberry · Invasive
+                    </div>
+                  </div>
+
+                  <h3 className="font-display text-lg font-bold text-[#143424]">
+                    2. Instant AI plant detection
+                  </h3>
+                  <p className="mt-1.5 text-xs sm:text-sm text-[#5d6b60] leading-relaxed">
+                    Gemini Vision pinpoints individual foliage boundaries and matches species against 237 curated New Jersey botanical records.
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[#f0ece1] flex items-center gap-1.5 text-xs font-semibold text-[#2f7d3a]">
+                  <Check className="h-3.5 w-3.5" />
+                  <span>Interactive canvas lets you adjust or re-scan</span>
+                </div>
+              </div>
+
+              {/* Step 3: Yard Native Score & Eco Swaps */}
+              <div className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-[#e2dec9] bg-white p-5 sm:p-6 shadow-xs hover:shadow-md transition duration-300">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#edf3e3] text-[#2f7d3a] font-black text-sm">
+                      03
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#faf9f5] border border-[#e2dec9] px-2.5 py-1 text-[11px] font-semibold text-[#5d6b60]">
+                      <Sparkles className="h-3.5 w-3.5 text-[#2f7d3a]" />
+                      Eco Score
+                    </span>
+                  </div>
+
+                  {/* Visual Preview 3: Score Ring & Native Swap Preview */}
+                  <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-[#e2dec9] bg-[#faf9f5] p-3 flex flex-col justify-between mb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="grid h-7 w-7 place-items-center rounded-full bg-[#143424] text-xs font-black text-[#d7f27a]">
+                          78
+                        </span>
+                        <div>
+                          <p className="text-[11px] font-bold text-[#143424]">Grade B+ · Good</p>
+                          <p className="text-[9px] text-[#7a806e]">8 Native · 2 Invasives</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold bg-[#edf3e3] text-[#2f7d3a] rounded-full px-2 py-0.5">
+                        NJ Ecoregion
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-2 text-[10px] flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-rose-900">Replace Barberry</p>
+                        <p className="text-rose-700">Swap with Spicebush</p>
+                      </div>
+                      <span className="font-bold text-emerald-800 bg-emerald-100 rounded-md px-1.5 py-0.5 text-[9px]">
+                        +210 hosts
+                      </span>
+                    </div>
+                  </div>
+
+                  <h3 className="font-display text-lg font-bold text-[#143424]">
+                    3. Actionable swaps &amp; report
+                  </h3>
+                  <p className="mt-1.5 text-xs sm:text-sm text-[#5d6b60] leading-relaxed">
+                    Receive your 0–100 biodiversity score, safe eradication advice for invasives, and matching native substitutes.
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[#f0ece1] flex items-center gap-1.5 text-xs font-semibold text-[#2f7d3a]">
+                  <Check className="h-3.5 w-3.5" />
+                  <span>One-click PDF download for landscapers</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Interactive Launch Bar */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => handleLaunch("front-yard")}
+                className="inline-flex items-center gap-2 rounded-full bg-[#143424] px-5 py-2.5 text-xs sm:text-sm font-bold text-[#faf9f5] hover:bg-[#20523a] transition shadow-xs"
+              >
+                <Sparkles className="h-4 w-4 text-[#d7f27a]" />
+                <span>Try Live Front Yard Demo (78 Score)</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <a
+                href="#audit"
+                className="inline-flex items-center gap-2 rounded-full border border-[#e2dec9] bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-[#143424] hover:bg-[#f3f0e6] transition shadow-2xs"
+              >
+                <Camera className="h-4 w-4 text-[#2f7d3a]" />
+                <span>Scan Your Own Yard</span>
+              </a>
             </div>
           </div>
         </section>
@@ -724,104 +821,211 @@ export function LandingPage({
         </section>
 
         <section id="keystone" className="section-pad">
-          <div className="container-shell grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-            <div className="relative">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.8rem] border border-[#d9d2bc]">
-                <Image
-                  src="/images/garden-lush.jpg"
-                  alt="A dense garden with layers of foliage and flowers"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 46vw"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#10291d]/55 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
-                  <p className="max-w-[16rem] font-display text-[1.35rem] leading-tight text-[#f7f4e9]">
-                    Plant the plants that feed the most mouths.
-                  </p>
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#d7f27a] text-[#163f2c]">
-                    <Leaf className="h-4 w-4" />
-                  </span>
-                </div>
-              </div>
-              <div className="absolute -right-3 -top-3 hidden rounded-2xl border border-[#d8d3bf] bg-[#fbfaf4] px-4 py-3 shadow-lg sm:block">
-                <p className="text-[0.6rem] font-bold uppercase tracking-[0.11em] text-[#7a806e]">
-                  Native plant power
-                </p>
-                <p className="mt-1 font-display text-xl font-semibold text-[#163f2c]">
-                  90% of caterpillars
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <p className="eyebrow text-[#6b7a68]">Why native, why now</p>
-              <h2 className="mt-3 font-display text-[clamp(2.35rem,4.2vw,3.55rem)] font-semibold leading-[0.99] tracking-[-0.045em] text-[#163f2c]">
-                A pollinator garden is a food web, not a flower bed.
+          <div className="container-shell">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="eyebrow text-[#586e5c]">The Ecological Difference</p>
+              <h2 className="mt-3 font-display text-[clamp(2.1rem,4.2vw,3.4rem)] font-semibold leading-[1.02] tracking-[-0.04em] text-[#163f2c]">
+                Invasive Trap vs. Keystone Engine
               </h2>
               <p className="mt-4 text-[0.96rem] leading-7 text-[#5d6b60]">
-                Most caterpillars can eat only a few native plant lineages.
-                Replace those plants with exotic ornamentals and the insects
-                disappear—followed by the birds that need them. Keystone natives
-                do the heaviest lifting.
+                A pollinator garden is a food web, not just a flower bed. Suburban
+                yards can either starve local wildlife or power an entire songbird
+                ecosystem. See the real difference plant choices make.
               </p>
+            </div>
 
-              <div className="mt-6 space-y-2.5">
-                {[
-                  {
-                    name: "White Oak",
-                    latin: "Quercus alba",
-                    value: "500+",
-                    label: "caterpillar species",
-                    icon: TreePine,
-                  },
-                  {
-                    name: "Wrinkleleaf Goldenrod",
-                    latin: "Solidago rugosa",
-                    value: "115+",
-                    label: "caterpillar species",
-                    icon: Flower2,
-                  },
-                  {
-                    name: "Highbush Blueberry",
-                    latin: "Vaccinium corymbosum",
-                    value: "211+",
-                    label: "caterpillar species",
-                    icon: Leaf,
-                  },
-                ].map((plant) => (
-                  <div
-                    key={plant.name}
-                    className="flex items-center gap-4 rounded-2xl border border-[#d9d4c4] bg-[#fbfaf4] px-4 py-3.5"
-                  >
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#e7efdc] text-[#3f7d45]">
-                      <plant.icon className="h-4 w-4" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[0.85rem] font-bold text-[#263b2b]">
-                        {plant.name}
+            <div className="mt-10 grid gap-6 lg:grid-cols-2">
+              {/* Card 1: Invasive Trap */}
+              <div className="overflow-hidden rounded-[1.8rem] border border-amber-300/80 bg-gradient-to-b from-amber-50/50 via-[#fbfaf4] to-[#fbfaf4] p-6 shadow-sm transition hover:shadow-md">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-100/80 px-3 py-1 text-[0.66rem] font-bold uppercase tracking-[0.09em] text-amber-900">
+                    <AlertTriangle className="h-3.5 w-3.5 text-amber-700" />
+                    Ecological Dead End
+                  </span>
+                  <span className="text-[0.72rem] font-semibold text-amber-900/70">
+                    Suburban Trap
+                  </span>
+                </div>
+
+                <div className="relative mt-4 aspect-[16/10] overflow-hidden rounded-2xl border border-amber-200/70">
+                  <Image
+                    src="/images/invasive-yard.jpg"
+                    alt="Suburban lawn with invasive Bradford pear and Japanese barberry"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 48vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white">
+                    <div>
+                      <p className="font-display text-base font-bold text-white drop-shadow-sm">
+                        Bradford Pear & Japanese Barberry
                       </p>
-                      <p className="text-[0.7rem] italic text-[#8b9182]">
-                        {plant.latin}
+                      <p className="text-[0.68rem] text-amber-200">
+                        Pyrus calleryana & Berberis thunbergii
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-display text-[1.15rem] font-semibold leading-none text-[#3f7d45]">
-                        {plant.value}
+                    <span className="rounded-lg bg-black/50 px-2 py-1 text-[0.62rem] font-medium backdrop-blur-sm">
+                      Non-Native / Invasive
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-200/60 bg-white/70 p-3">
+                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
+                      <Bug className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[0.82rem] font-bold text-[#1f2b20]">
+                        1 Host Insect Species
                       </p>
-                      <p className="mt-1 text-[0.6rem] uppercase tracking-[0.08em] text-[#8b9182]">
-                        {plant.label}
+                      <p className="text-[0.74rem] leading-snug text-[#636c64]">
+                        Virtually zero native caterpillars can digest its leaves. Creates an insect-free food desert.
                       </p>
                     </div>
                   </div>
-                ))}
+
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-200/60 bg-white/70 p-3">
+                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
+                      <ShieldAlert className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[0.82rem] font-bold text-[#1f2b20]">
+                        Harbors Lyme Disease Ticks
+                      </p>
+                      <p className="text-[0.74rem] leading-snug text-[#636c64]">
+                        Dense barberry thickets retain humidity, harboring up to 12x higher blacklegged tick densities.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-200/60 bg-white/70 p-3">
+                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-amber-100 text-amber-800">
+                      <AlertTriangle className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[0.82rem] font-bold text-[#1f2b20]">
+                        Brittle Wood & Storm Splitting
+                      </p>
+                      <p className="text-[0.74rem] leading-snug text-[#636c64]">
+                        Weak crotches snap under moderate wind and snow, causing property damage and spreading seeds into wild areas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-100/60 px-3.5 py-2.5 text-center text-[0.75rem] font-semibold text-amber-900">
+                  Impact: Starves 96% of native backyard songbirds needing caterpillar protein.
+                </div>
               </div>
 
+              {/* Card 2: Keystone Native Engine */}
+              <div className="overflow-hidden rounded-[1.8rem] border border-emerald-300/80 bg-gradient-to-b from-emerald-50/50 via-[#fbfaf4] to-[#fbfaf4] p-6 shadow-sm transition hover:shadow-md">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-100/80 px-3 py-1 text-[0.66rem] font-bold uppercase tracking-[0.09em] text-emerald-950">
+                    <Sparkles className="h-3.5 w-3.5 text-emerald-700" />
+                    Keystone Powerhouse
+                  </span>
+                  <span className="text-[0.72rem] font-semibold text-emerald-900/70">
+                    Ecological Anchor
+                  </span>
+                </div>
+
+                <div className="relative mt-4 aspect-[16/10] overflow-hidden rounded-2xl border border-emerald-200/70">
+                  <Image
+                    src="/images/garden-lush.jpg"
+                    alt="Flourishing yard with native Oak and blueberry canopy"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 48vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white">
+                    <div>
+                      <p className="font-display text-base font-bold text-white drop-shadow-sm">
+                        White Oak & Highbush Blueberry
+                      </p>
+                      <p className="text-[0.68rem] text-emerald-200">
+                        Quercus alba & Vaccinium corymbosum
+                      </p>
+                    </div>
+                    <span className="rounded-lg bg-black/50 px-2 py-1 text-[0.62rem] font-medium backdrop-blur-sm">
+                      Indigenous NJ Native
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  <div className="flex items-start gap-3 rounded-xl border border-emerald-200/60 bg-white/70 p-3">
+                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-emerald-100 text-emerald-800">
+                      <Bug className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[0.82rem] font-bold text-[#1f2b20]">
+                        534+ Caterpillar Host Species
+                      </p>
+                      <p className="text-[0.74rem] leading-snug text-[#636c64]">
+                        Oaks host more beneficial Lepidoptera species than any other tree genus in North America.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 rounded-xl border border-emerald-200/60 bg-white/70 p-3">
+                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-emerald-100 text-emerald-800">
+                      <Bird className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[0.82rem] font-bold text-[#1f2b20]">
+                        Feeds 6,000–9,000 Chicks Per Nest
+                      </p>
+                      <p className="text-[0.74rem] leading-snug text-[#636c64]">
+                        A single clutch of chickadees requires thousands of soft caterpillars to fledge into adulthood.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 rounded-xl border border-emerald-200/60 bg-white/70 p-3">
+                    <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-emerald-100 text-emerald-800">
+                      <Droplets className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-[0.82rem] font-bold text-[#1f2b20]">
+                        Stormwater & Drought Immune
+                      </p>
+                      <p className="text-[0.74rem] leading-snug text-[#636c64]">
+                        Deep perennial root structures absorb thousands of gallons of stormwater without supplemental irrigation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-100/60 px-3.5 py-2.5 text-center text-[0.75rem] font-semibold text-emerald-950">
+                  Impact: Keystone natives do 75% of the ecological heavy lifting in New Jersey.
+                </div>
+              </div>
+            </div>
+
+            {/* High-Converting Action Bar */}
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-[#d9d4c4] bg-[#fbfaf4] p-5 sm:flex-row sm:p-6">
+              <div className="flex items-center gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#163f2c] text-[#d7f27a]">
+                  <ScanLine className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-[0.88rem] font-bold text-[#163f2c]">
+                    Wondering what is currently growing in your yard?
+                  </p>
+                  <p className="text-[0.75rem] text-[#636f62]">
+                    90% of suburban NJ yards harbor at least one unrecognized invasive species.
+                  </p>
+                </div>
+              </div>
               <a
                 href="#audit"
-                className="mt-6 inline-flex items-center gap-2 text-[0.82rem] font-bold text-[#3f7d45] underline decoration-[#b9d19a] decoration-2 underline-offset-4 transition hover:text-[#163f2c]"
+                className="btn btn-lime shrink-0 px-5 py-3 text-[0.84rem]"
               >
-                See what your yard is missing
+                Find Out With a Free Photo Audit
                 <ArrowRight className="h-4 w-4" />
               </a>
             </div>
