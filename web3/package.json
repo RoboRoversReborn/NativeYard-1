@@ -9,7 +9,7 @@
     "lint": "eslint",
     "firebase:setup": "node scripts/setup-firebase.mjs",
     "firebase:login": "npx firebase-tools login",
-    "firebase:deploy-rules": "npx firebase-tools deploy --only firestore:rules,storage:rules",
+    "firebase:deploy-rules": "npx firebase-tools deploy --only firestore:rules,storage",
     "firebase:deploy": "npx firebase-tools deploy",
     "seed:db": "node scripts/seed-firebase-plants.mjs"
   },
