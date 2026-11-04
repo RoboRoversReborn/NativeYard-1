@@ -27,27 +27,25 @@ export function Brand({
   className = "",
   href = "/",
   light = false,
+  onClick,
 }: {
   className?: string;
   href?: string;
   light?: boolean;
+  onClick?: () => void;
 }) {
-  return (
-    <Link
-      href={href}
-      className={`group inline-flex items-center gap-2.5 ${className}`}
-      aria-label="NativeYard home"
-    >
+  const content = (
+    <>
       <span
-        className={`grid h-9 w-9 place-items-center rounded-full ${
-          light ? "bg-[#d7f27a] text-[#163f2c]" : "bg-[#163f2c] text-[#d7f27a]"
-        } transition-transform duration-300 group-hover:-rotate-6`}
+        className={`grid h-8 sm:h-9 w-8 sm:w-9 place-items-center rounded-full ${
+          light ? "bg-[#d7f27a] text-[#163f2c]" : "bg-[#143424] text-[#d7f27a]"
+        } transition-transform duration-300 group-hover:-rotate-6 shadow-2xs`}
       >
-        <LeafMark className="h-5 w-5" />
+        <LeafMark className="h-4 sm:h-5 w-4 sm:w-5" />
       </span>
       <span
-        className={`font-display text-[1.35rem] font-semibold tracking-[-0.03em] ${
-          light ? "text-[#f7f4e9]" : "text-[#163f2c]"
+        className={`font-display text-[1.2rem] sm:text-[1.35rem] font-semibold tracking-[-0.03em] ${
+          light ? "text-[#faf9f5]" : "text-[#143424]"
         }`}
       >
         NativeYard
@@ -56,11 +54,34 @@ export function Brand({
         className={`rounded-full px-1.5 py-0.5 text-[0.52rem] font-black uppercase tracking-[0.12em] ${
           light
             ? "bg-[#d7f27a] text-[#163f2c]"
-            : "bg-[#163f2c] text-[#d7f27a]"
+            : "bg-[#143424] text-[#d7f27a]"
         }`}
       >
         NJ
       </span>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`group inline-flex items-center gap-2 ${className}`}
+        aria-label="NativeYard home"
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className={`group inline-flex items-center gap-2 ${className}`}
+      aria-label="NativeYard home"
+    >
+      {content}
     </Link>
   );
 }

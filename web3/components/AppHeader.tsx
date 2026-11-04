@@ -39,20 +39,7 @@ export function AppHeader({
       <div className="container-shell flex h-14 sm:h-16 items-center justify-between gap-3">
         {/* Left: Brand & Navigation */}
         <div className="flex items-center gap-3 sm:gap-6">
-          {onHome ? (
-            <button
-              type="button"
-              onClick={onHome}
-              className="flex items-center text-left hover:opacity-90 transition"
-              aria-label="Back to NativeYard home"
-            >
-              <Brand />
-            </button>
-          ) : (
-            <Link href="/" className="flex items-center text-left hover:opacity-90 transition" aria-label="NativeYard home">
-              <Brand />
-            </Link>
-          )}
+          <Brand onClick={onHome} />
 
           {stage === "landing" && (
             <nav className="hidden items-center gap-6 text-[0.82rem] font-semibold text-[#425445] lg:flex">
