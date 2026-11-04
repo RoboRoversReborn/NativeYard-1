@@ -177,17 +177,92 @@ create table if not exists public.plants (
 
 alter table public.plants enable row level security;
 
+-- 7. Admin Authorization & Curator Management
+create table if not exists public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  email text not null,
+  role text not null default 'admin', -- 'admin' | 'curator'
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.admin_users enable row level security;
+
+-- Users can read their own admin status
+drop policy if exists "Users can check own admin status" on public.admin_users;
+create policy "Users can check own admin status"
+  on public.admin_users for select
+  using (auth.uid() = user_id);
+
+-- Fast security-definer helper function to verify admin status in RLS policies
+create or replace function public.is_admin(uid uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.admin_users
+    where admin_users.user_id = uid
+  );
+$$;
+
 -- Public can read all plants
+drop policy if exists "Anyone can read plants catalog" on public.plants;
 create policy "Anyone can read plants catalog"
   on public.plants for select
   using (true);
 
--- Authenticated curators can insert and update plants
-create policy "Authenticated users can insert plants"
-  on public.plants for insert
-  with check (auth.role() = 'authenticated');
+-- Only verified admins can insert, update, or delete plants
+drop policy if exists "Authenticated users can insert plants" on public.plants;
+drop policy if exists "Authenticated users can update plants" on public.plants;
+drop policy if exists "Only admins can insert plants" on public.plants;
+drop policy if exists "Only admins can update plants" on public.plants;
+drop policy if exists "Only admins can delete plants" on public.plants;
 
-create policy "Authenticated users can update plants"
+create policy "Only admins can insert plants"
+  on public.plants for insert
+  with check (public.is_admin(auth.uid()) = true);
+
+create policy "Only admins can update plants"
   on public.plants for update
-  using (auth.role() = 'authenticated');
+  using (public.is_admin(auth.uid()) = true);
+
+create policy "Only admins can delete plants"
+  on public.plants for delete
+  using (public.is_admin(auth.uid()) = true);
+
+-- 8. Storage Bucket for Botanical Photography Uploads
+insert into storage.buckets (id, name, public)
+values ('plant-images', 'plant-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Public Can View Plant Images" on storage.objects;
+drop policy if exists "Admins Can Upload Plant Images" on storage.objects;
+drop policy if exists "Admins Can Update Plant Images" on storage.objects;
+drop policy if exists "Admins Can Delete Plant Images" on storage.objects;
+
+create policy "Public Can View Plant Images"
+  on storage.objects for select
+  using (bucket_id = 'plant-images');
+
+create policy "Admins Can Upload Plant Images"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'plant-images'
+    and public.is_admin(auth.uid()) = true
+  );
+
+create policy "Admins Can Update Plant Images"
+  on storage.objects for update
+  using (
+    bucket_id = 'plant-images'
+    and public.is_admin(auth.uid()) = true
+  );
+
+create policy "Admins Can Delete Plant Images"
+  on storage.objects for delete
+  using (
+    bucket_id = 'plant-images'
+    and public.is_admin(auth.uid()) = true
+  );
 

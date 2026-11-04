@@ -13,7 +13,9 @@ import {
   ChevronRight,
   FileText,
   Flower2,
+  Home,
   Leaf,
+  LogIn,
   MapPin,
   ScanLine,
   ShieldCheck,
@@ -21,8 +23,10 @@ import {
   TreePine,
   UploadCloud,
   X,
+  Zap,
 } from "lucide-react";
 import { Brand } from "./brand";
+import { HeaderAuth } from "./header-auth";
 import { StatusBadge } from "./status-badge";
 import {
   buildSamplePreview,
@@ -36,6 +40,7 @@ import {
   buildSampleAudit,
   SampleYardKey,
 } from "@/lib/sampleDetections";
+import type { Property, YardArea } from "@/lib/types";
 
 type LandingPageProps = {
   photo: string | null;
@@ -45,11 +50,21 @@ type LandingPageProps = {
   onPhoto: (file: File) => void;
   onSample: () => void;
   onSelectSample?: (key: "front-yard" | "back-yard" | "side-yard") => void;
+  onLaunchSample?: (key?: "front-yard" | "back-yard" | "side-yard") => void;
   selectedSampleKey?: string;
   onClearPhoto: () => void;
   onZip: (value: string) => void;
   onStart: () => void;
   onTriggerCamera?: () => void;
+  user?: any;
+  properties?: Property[];
+  selectedProperty?: Property | null;
+  selectedArea?: YardArea | null;
+  onSelectProperty?: (property: Property) => void;
+  onSelectArea?: (area: YardArea) => void;
+  onOpenAuth?: () => void;
+  onSignOut?: () => void;
+  onOpenPropertyManager?: () => void;
 };
 
 export function LandingPage({
@@ -60,24 +75,44 @@ export function LandingPage({
   onPhoto,
   onSample,
   onSelectSample,
+  onLaunchSample,
   selectedSampleKey,
   onClearPhoto,
   onZip,
   onStart,
   onTriggerCamera,
+  user,
+  properties = [],
+  selectedProperty = null,
+  selectedArea = null,
+  onSelectProperty,
+  onSelectArea,
+  onOpenAuth,
+  onSignOut,
+  onOpenPropertyManager,
 }: LandingPageProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [launchpadMode, setLaunchpadMode] = useState<"upload" | "sample">(isSample ? "sample" : "upload");
   const region = regionForZip(zip);
   const zipInvalid = zip.length === 5 && !isNjZip(zip);
   const currentKey: SampleYardKey = (selectedSampleKey as SampleYardKey) || "front-yard";
   const currentSampleConfig = SAMPLE_YARDS[currentKey] || SAMPLE_YARDS["front-yard"];
   const sample = useMemo(() => buildSampleAudit(currentKey, zip), [currentKey, zip]);
 
+  const handleLaunch = (key?: SampleYardKey) => {
+    const targetKey = key || currentKey;
+    if (onLaunchSample) {
+      onLaunchSample(targetKey);
+    } else {
+      onSample();
+    }
+  };
+
   return (
     <div className="min-h-screen overflow-x-clip bg-[#f7f4e9] text-[#1d2a21]">
       <header className="site-header no-print">
-        <div className="container-shell flex h-[4.5rem] items-center justify-between gap-6">
+        <div className="container-shell flex h-[4.5rem] items-center justify-between gap-4">
           <Brand />
           <nav className="hidden items-center gap-7 text-[0.84rem] font-semibold text-[#425445] lg:flex">
             <a className="nav-link" href="#how-it-works">
@@ -97,20 +132,34 @@ export function LandingPage({
               <span>Flora Database</span>
             </a>
           </nav>
-          <a
-            href="#audit"
-            className="btn btn-dark hidden text-[0.78rem] sm:inline-flex"
-          >
-            Start a free audit
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
-          <a
-            href="#audit"
-            className="btn btn-dark text-[0.76rem] sm:hidden"
-          >
-            Start audit
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
+
+          <div className="flex items-center gap-2.5">
+            <HeaderAuth
+              user={user}
+              onOpenAuth={onOpenAuth}
+              onSignOut={onSignOut}
+              onOpenPropertyManager={onOpenPropertyManager}
+            />
+
+            {!user && (
+              <>
+                <a
+                  href="#audit"
+                  className="btn btn-dark hidden text-[0.78rem] sm:inline-flex"
+                >
+                  Start free audit
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+                <a
+                  href="#audit"
+                  className="btn btn-dark text-[0.76rem] sm:hidden"
+                >
+                  Start audit
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -118,395 +167,447 @@ export function LandingPage({
         <section className="hero" id="top">
           <div className="hero-glow hero-glow--one" />
           <div className="hero-glow hero-glow--two" />
-          <div className="container-shell relative z-10 grid items-start gap-12 py-10 sm:py-14 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:py-20">
-            <div className="max-w-[39rem]">
-              <div className="eyebrow mb-5 inline-flex items-center gap-2 rounded-full border border-[#d8d3bf] bg-[#fbfaf4]/80 px-3 py-1.5 text-[#425445] backdrop-blur">
+          <div className="container-shell relative z-10 py-8 sm:py-12 lg:py-16">
+            {/* Hero Top Copy */}
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="eyebrow mb-4 inline-flex items-center gap-2 rounded-full border border-[#d8d3bf] bg-[#fbfaf4]/90 px-3.5 py-1.5 text-xs text-[#425445] backdrop-blur">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#6c9a62] opacity-60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-[#3f7d45]" />
                 </span>
-                A New Jersey yard audit for the living world
+                {user ? (
+                  <span>
+                    Welcome back, <strong>{user.email?.split("@")[0]}</strong> · NativeYard NJ Homeowner
+                  </span>
+                ) : (
+                  <span>A New Jersey yard audit for the living world</span>
+                )}
               </div>
 
-              <h1 className="font-display text-[clamp(3.15rem,6.7vw,5.65rem)] font-semibold leading-[0.91] tracking-[-0.055em] text-[#163f2c]">
-                See your yard
-                <br />
-                through{" "}
-                <span className="italic text-[#4f7c4a]">nature&apos;s</span>
-                <br />
-                eyes.
+              <h1 className="font-display text-[clamp(2.75rem,5.5vw,4.75rem)] font-semibold leading-[0.93] tracking-[-0.05em] text-[#163f2c]">
+                See your yard through{" "}
+                <span className="italic text-[#4f7c4a]">nature&apos;s</span> eyes.
               </h1>
 
-              <p className="mt-6 max-w-[34rem] text-[1.03rem] leading-7 text-[#536257] sm:text-[1.12rem] sm:leading-8">
-                One photo. A New Jersey plant-by-plant audit that separates the
-                keystone natives from the regulated invasives—then hands you a
-                practical plan for a yard that feeds pollinators, birds, and
-                caterpillars.
+              <p className="mx-auto mt-4 max-w-2xl text-[0.98rem] leading-7 text-[#536257] sm:text-[1.08rem] sm:leading-8">
+                One photo. A New Jersey plant-by-plant audit that separates keystone natives
+                from regulated invasives—handing you a tailored plan that feeds birds and pollinators.
               </p>
 
-              <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-[0.78rem] font-semibold text-[#56665a]">
-                <span className="inline-flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 text-[#3f7d45]" />
-                  No account needed
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 text-[#3f7d45]" />
-                  NJ ecoregion-calibrated
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 text-[#3f7d45]" />
-                  Actionable PDF
-                </span>
-              </div>
+              {/* Status & Trust Badges */}
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#bcd79a] bg-[#edf3e3] px-3.5 py-1.5 text-xs text-[#163f2c]">
+                  <span className="flex h-2 w-2 rounded-full bg-[#2f7d3a]" />
+                  <span className="font-bold">Instant Free Audit</span>
+                  <span className="text-[#a5b89a]">•</span>
+                  <span className="text-[#556950]">No sign-up required to scan</span>
+                </div>
 
-              <div className="upload-card mt-8" id="audit">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="eyebrow text-[#6b7a68]">Start your free audit</p>
-                    <h2 className="mt-1 font-display text-[1.6rem] font-semibold tracking-[-0.03em] text-[#163f2c]">
-                      What&apos;s growing out there?
-                    </h2>
+                {user ? (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#bcd79a] bg-white px-3.5 py-1.5 text-xs font-bold text-[#2f7d3a]">
+                    <span>💾 Historical Progress Active</span>
+                    <span className="text-[#a5b89a]">•</span>
+                    <span className="font-normal text-[#556950]">Scans auto-save to your account</span>
                   </div>
-                  <span className="rounded-full border border-[#d8d3bf] bg-[#f4f1e6] px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-[0.12em] text-[#7a806e]">
-                    New Jersey beta
-                  </span>
-                </div>
-
-                <div
-                  className={`dropzone mt-4 ${dragging ? "is-dragging" : ""} ${
-                    photo ? "has-photo" : ""
-                  }`}
-                  onDragOver={(event) => {
-                    event.preventDefault();
-                    setDragging(true);
-                  }}
-                  onDragLeave={() => setDragging(false)}
-                  onDrop={(event) => {
-                    event.preventDefault();
-                    setDragging(false);
-                    const file = event.dataTransfer.files?.[0];
-                    if (file) onPhoto(file);
-                  }}
-                  onClick={() => inputRef.current?.click()}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      inputRef.current?.click();
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Upload a yard photo"
-                >
-                  <input
-                    ref={inputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                    className="sr-only"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) onPhoto(file);
-                      event.target.value = "";
-                    }}
-                  />
-
-                  {photo ? (
-                    <>
-                      <img
-                        src={photo}
-                        alt="Selected yard preview"
-                        className="dropzone__preview"
-                      />
-                      <div className="dropzone__overlay">
-                        <div className="flex items-center gap-2 rounded-full bg-[#f7f4e9]/95 px-3 py-1.5 text-[0.72rem] font-bold text-[#163f2c] shadow-sm">
-                          <Check className="h-3.5 w-3.5 text-[#3f7d45]" />
-                          {isSample ? "Sample yard loaded" : "Photo ready to audit"}
-                        </div>
-                        <button
-                          type="button"
-                          className="grid h-8 w-8 place-items-center rounded-full bg-[#163f2c]/80 text-[#f7f4e9] backdrop-blur transition hover:bg-[#163f2c]"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onClearPhoto();
-                          }}
-                          aria-label="Remove photo"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center px-5 py-7 text-center">
-                      <span className="grid h-11 w-11 place-items-center rounded-full bg-[#e7efdc] text-[#3f7d45]">
-                        <UploadCloud className="h-5 w-5" />
-                      </span>
-                      <p className="mt-3 text-[0.88rem] font-bold text-[#263b2b]">
-                        Drop your yard photo here, or click to browse
-                      </p>
-                      <p className="mt-1 text-[0.76rem] leading-5 text-[#7a806e]">
-                        Wide-angle daytime photos of your garden bed work best
-                      </p>
-
-                      <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            inputRef.current?.click();
-                          }}
-                          className="btn bg-[#163f2c] text-[#d7f27a] font-bold text-xs px-4 py-2 hover:bg-[#1e4d37] shadow-xs"
-                        >
-                          <UploadCloud className="h-3.5 w-3.5" />
-                          Choose Photo File
-                        </button>
-                        {onTriggerCamera && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onTriggerCamera();
-                            }}
-                            className="btn bg-white text-[#163f2c] border border-[#ede7d5] font-bold text-xs px-4 py-2 hover:bg-[#ede7d5]/50 shadow-xs"
-                          >
-                            <Camera className="h-3.5 w-3.5 text-[#3f7d45]" />
-                            Take Snap with Camera
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* 3 Prepopulated Sample Yards for Demo */}
-                <div className="mt-4 rounded-2xl border border-[#ede7d5] bg-white p-3 shadow-xs">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-bold text-[#163f2c] flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-[#3f7d45]" />
-                      Or try one of the 3 pre-computed NJ sample yards:
-                    </span>
-                    <span className="text-[10px] text-[#8b9182]">Instant Demo</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onSelectSample ? onSelectSample("front-yard") : onSample()}
-                      className={`flex flex-col text-left p-2.5 rounded-xl border transition-all ${
-                        isSample && selectedSampleKey === "front-yard"
-                          ? "border-[#163f2c] bg-[#163f2c]/5 shadow-xs"
-                          : "border-[#ede7d5] hover:border-[#163f2c]/40 hover:bg-[#fbfaf4]"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#163f2c]">🏡 Front Yard</span>
-                        <span className="text-[9px] font-bold text-[#a87a2c] bg-[#faf1dc] px-1.5 py-0.5 rounded">
-                          Score {SAMPLE_YARDS["front-yard"].initialScore}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-[#7a806e] mt-1 line-clamp-2">
-                        Suburban foundation with Barberry, Burning Bush, and White Oak.
-                      </p>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => onSelectSample ? onSelectSample("back-yard") : onSample()}
-                      className={`flex flex-col text-left p-2.5 rounded-xl border transition-all ${
-                        isSample && selectedSampleKey === "back-yard"
-                          ? "border-[#163f2c] bg-[#163f2c]/5 shadow-xs"
-                          : "border-[#ede7d5] hover:border-[#163f2c]/40 hover:bg-[#fbfaf4]"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#163f2c]">🌸 Backyard</span>
-                        <span className="text-[9px] font-bold text-[#3f7d45] bg-[#3f7d45]/10 px-1.5 py-0.5 rounded">
-                          Score {SAMPLE_YARDS["back-yard"].initialScore}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-[#7a806e] mt-1 line-clamp-2">
-                        Pollinator sunny border with Milkweed, Goldenrod, and English Ivy.
-                      </p>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => onSelectSample ? onSelectSample("side-yard") : onSample()}
-                      className={`flex flex-col text-left p-2.5 rounded-xl border transition-all ${
-                        isSample && selectedSampleKey === "side-yard"
-                          ? "border-[#163f2c] bg-[#163f2c]/5 shadow-xs"
-                          : "border-[#ede7d5] hover:border-[#163f2c]/40 hover:bg-[#fbfaf4]"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#163f2c]">🌲 Side Yard</span>
-                        <span className="text-[9px] font-bold text-[#b6533d] bg-[#b6533d]/10 px-1.5 py-0.5 rounded">
-                          Score {SAMPLE_YARDS["side-yard"].initialScore}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-[#7a806e] mt-1 line-clamp-2">
-                        Woodland edge with Dogwood, invasive Callery Pear, and Privet.
-                      </p>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
-                  <label className="zip-field flex-1">
-                    <MapPin className="h-4 w-4 shrink-0 text-[#6b7a68]" />
-                    <span className="sr-only">ZIP code</span>
-                    <input
-                      name="yard-location-code"
-                      autoComplete="off"
-                      autoCorrect="off"
-                      spellCheck={false}
-                      value={zip}
-                      onChange={(event) =>
-                        onZip(event.target.value.replace(/\D/g, "").slice(0, 5))
-                      }
-                      inputMode="numeric"
-                      maxLength={5}
-                      placeholder="NJ ZIP"
-                      aria-label="Yard ZIP code"
-                    />
-                    <span className="whitespace-nowrap text-[0.64rem] font-bold uppercase tracking-[0.1em] text-[#8b9182]">
-                      {region.county && region.county !== "New Jersey"
-                        ? `${region.county} County`
-                        : `Zone ${region.zone}`}
-                    </span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={onStart}
-                    className="btn btn-lime justify-center px-5 py-3 text-[0.82rem] sm:min-w-[10.5rem]"
-                  >
-                    Audit my yard
-                    <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {zipInvalid ? (
-                  <p className="mt-2 rounded-xl bg-[#fae8e1] px-3 py-2 text-[0.76rem] font-semibold text-[#a34832]">
-                    NativeYard NJ is calibrated for New Jersey ZIP codes
-                    (07000–08999). Try 07645 for the sample region.
-                  </p>
-                ) : region.notice ? (
-                  <p className="mt-2 rounded-xl bg-[#faf1dc] px-3 py-2 text-[0.72rem] font-semibold leading-5 text-[#7b6228]">
-                    {region.notice}
-                  </p>
-                ) : null}
-
-                {error ? (
-                  <p className="mt-2 rounded-xl bg-[#fae8e1] px-3 py-2 text-[0.76rem] font-semibold text-[#a34832]">
-                    {error}
-                  </p>
                 ) : (
-                  <p className="mt-3 flex items-center gap-1.5 text-[0.68rem] text-[#8b9182]">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    Photos stay in your session. No account or email required.
-                  </p>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] px-3.5 py-1.5 text-xs text-[#56665a]">
+                    <span className="text-xs">💾</span>
+                    <span>Sign in anytime to save &amp; reload over seasons</span>
+                  </div>
                 )}
               </div>
             </div>
 
-            <div className="hero-visual relative mx-auto w-full max-w-[39rem] lg:mt-10">
-              <div
-                onClick={() => onSelectSample ? onSelectSample(currentKey) : onSample()}
-                className="hero-photo relative overflow-hidden rounded-[2rem] border border-[#d9d2bc] bg-[#dfe7d3] shadow-[0_28px_80px_rgba(45,61,42,0.2)] cursor-pointer transition-transform hover:scale-[1.01]"
-              >
-                <img
-                  src={currentSampleConfig.filename}
-                  alt={currentSampleConfig.name}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#10291d]/65 via-transparent to-[#10291d]/10" />
+            {/* UNIFIED ALL-IN-ONE AUDIT LAUNCHPAD CARD */}
+            <div className="mx-auto mt-8 max-w-4xl overflow-hidden rounded-[2rem] border border-[#d8d3bf] bg-[#fbfaf4] shadow-[0_24px_70px_rgba(45,61,42,0.12)]" id="audit">
+              {/* Segmented Mode Switcher */}
+              <div className="flex border-b border-[#e8e4d5] bg-[#f2efe4] p-1.5 sm:p-2 gap-1.5 sm:gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLaunchpadMode("upload")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                    launchpadMode === "upload"
+                      ? "bg-[#163f2c] text-[#d7f27a] shadow-xs"
+                      : "bg-transparent text-[#5d6b60] hover:bg-[#e5e0d1] hover:text-[#163f2c]"
+                  }`}
+                >
+                  <UploadCloud className="h-4 w-4" />
+                  <span>Upload Your Yard Photo</span>
+                </button>
 
-                <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-white/20 bg-[#10291d]/70 px-3 py-1.5 text-[0.63rem] font-bold uppercase tracking-[0.13em] text-[#f7f4e9] backdrop-blur">
-                  <ScanLine className="h-3.5 w-3.5 text-[#d7f27a]" />
-                  {currentSampleConfig.name}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setLaunchpadMode("sample")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                    launchpadMode === "sample"
+                      ? "bg-[#163f2c] text-[#d7f27a] shadow-xs"
+                      : "bg-transparent text-[#5d6b60] hover:bg-[#e5e0d1] hover:text-[#163f2c]"
+                  }`}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Try 3 Live NJ Sample Yards</span>
+                </button>
+              </div>
 
-                {/* Floating Chips matching real sample detections */}
-                {sample.detections.slice(0, 3).map((det, idx) => {
-                  const plant = getPlant(det.plantId);
-                  if (!plant) return null;
-                  const chipClass =
-                    plant.status === "invasive"
-                      ? "detection-chip--invasive"
-                      : plant.status === "keystone"
-                        ? "detection-chip--keystone"
-                        : "detection-chip--native";
-                  const posClass =
-                    idx === 0
-                      ? "right-4 top-[18%]"
-                      : idx === 1
-                        ? "left-[8%] top-[34%] sm:left-[24%] sm:top-[48%]"
-                        : "right-[8%] top-[44%] sm:right-[6%] sm:top-[56%]";
+              {/* Mode 1: Upload Your Yard Photo */}
+              {launchpadMode === "upload" && (
+                <div className="p-5 sm:p-7 space-y-4 animate-fade-in">
+                  {/* Property & Area Target Bar (Signed In Users Only) */}
+                  {user && (
+                    <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-[#bcd79a] bg-[#edf3e3] p-3 text-xs text-[#163f2c]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="flex items-center gap-1.5 font-bold">
+                          <Home className="h-4 w-4 text-[#2f7d3a]" />
+                          Saving scan to:
+                        </span>
+                        {properties.length > 0 ? (
+                          <select
+                            value={selectedProperty?.id || ""}
+                            onChange={(e) => {
+                              const p = properties.find((item) => item.id === e.target.value);
+                              if (p && onSelectProperty) onSelectProperty(p);
+                            }}
+                            className="rounded-lg border border-[#bcd79a] bg-white px-2.5 py-1 text-xs font-bold text-[#163f2c] focus:outline-none"
+                          >
+                            {properties.map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {p.name}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="font-bold">Primary Residence</span>
+                        )}
 
-                  return (
-                    <div key={det.id} className={`absolute ${posClass} detection-chip ${chipClass}`}>
-                      <span className="detection-chip__dot" />
-                      {plant.commonName}
-                      <span className="detection-chip__status">
-                        {plant.status === "keystone"
-                          ? "Keystone"
-                          : plant.status === "invasive"
-                            ? "Invasive"
-                            : "Native"}
-                      </span>
+                        {selectedProperty?.yard_areas && selectedProperty.yard_areas.length > 0 && (
+                          <select
+                            value={selectedArea?.id || ""}
+                            onChange={(e) => {
+                              const a = selectedProperty.yard_areas?.find((item) => item.id === e.target.value);
+                              if (a && onSelectArea) onSelectArea(a);
+                            }}
+                            className="rounded-lg border border-[#bcd79a] bg-white px-2.5 py-1 text-xs font-bold text-[#163f2c] focus:outline-none"
+                          >
+                            {selectedProperty.yard_areas.map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+
+                      {onOpenPropertyManager && (
+                        <button
+                          type="button"
+                          onClick={onOpenPropertyManager}
+                          className="font-bold text-[#2f7d3a] hover:underline text-[11px]"
+                        >
+                          Manage Properties &amp; Past Scans
+                        </button>
+                      )}
                     </div>
-                  );
-                })}
+                  )}
 
-                <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/15 bg-[#f7f4e9]/95 p-4 shadow-xl backdrop-blur sm:inset-x-5 sm:bottom-5">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="eyebrow text-[0.59rem] text-[#7a806e]">
-                        Yard biodiversity score
-                      </p>
-                      <p className="mt-1 font-display text-[1.65rem] font-semibold leading-none text-[#163f2c]">
-                        {sample.score}
-                        <span className="text-[0.9rem] font-normal text-[#8b9182]">/100</span>
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-[#faf1dc] px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-[0.1em] text-[#a87a2c]">
-                      {sample.scoreLabel}
-                    </span>
-                  </div>
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#e2dfd0]">
-                    <div
-                      className="h-full rounded-full bg-[#3f7d45]"
-                      style={{ width: `${sample.score}%` }}
+                  {/* Dropzone Container */}
+                  <div
+                    className={`dropzone ${dragging ? "is-dragging" : ""} ${
+                      photo ? "has-photo" : ""
+                    }`}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setDragging(true);
+                    }}
+                    onDragLeave={() => setDragging(false)}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      setDragging(false);
+                      const file = event.dataTransfer.files?.[0];
+                      if (file) onPhoto(file);
+                    }}
+                    onClick={() => inputRef.current?.click()}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        inputRef.current?.click();
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Upload a yard photo"
+                  >
+                    <input
+                      ref={inputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                      className="sr-only"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) onPhoto(file);
+                        event.target.value = "";
+                      }}
                     />
+
+                    {photo ? (
+                      <>
+                        <img
+                          src={photo}
+                          alt="Selected yard preview"
+                          className="dropzone__preview"
+                        />
+                        <div className="dropzone__overlay">
+                          <div className="flex items-center gap-2 rounded-full bg-[#f7f4e9]/95 px-3 py-1.5 text-[0.72rem] font-bold text-[#163f2c] shadow-sm">
+                            <Check className="h-3.5 w-3.5 text-[#3f7d45]" />
+                            {isSample ? "Sample yard loaded" : "Photo ready to audit"}
+                          </div>
+                          <button
+                            type="button"
+                            className="grid h-8 w-8 place-items-center rounded-full bg-[#163f2c]/80 text-[#f7f4e9] backdrop-blur transition hover:bg-[#163f2c]"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onClearPhoto();
+                            }}
+                            aria-label="Remove photo"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center px-5 py-8 text-center">
+                        <span className="grid h-12 w-12 place-items-center rounded-full bg-[#e7efdc] text-[#3f7d45]">
+                          <UploadCloud className="h-6 w-6" />
+                        </span>
+                        <p className="mt-3 text-sm font-bold text-[#263b2b]">
+                          Drop your yard photo here, or click to browse
+                        </p>
+                        <p className="mt-1 text-xs text-[#7a806e]">
+                          Wide-angle daytime photos of your garden bed work best
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              inputRef.current?.click();
+                            }}
+                            className="btn bg-[#163f2c] text-[#d7f27a] font-bold text-xs px-4 py-2 hover:bg-[#1e4d37] shadow-xs"
+                          >
+                            <UploadCloud className="h-3.5 w-3.5" />
+                            Choose Photo File
+                          </button>
+                          {onTriggerCamera && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onTriggerCamera();
+                              }}
+                              className="btn bg-white text-[#163f2c] border border-[#ede7d5] font-bold text-xs px-4 py-2 hover:bg-[#ede7d5]/50 shadow-xs"
+                            >
+                              <Camera className="h-3.5 w-3.5 text-[#3f7d45]" />
+                              Take Snap with Camera
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="mt-3 flex items-center justify-between text-[0.66rem] font-semibold text-[#6b7a68]">
-                    <span>{sample.detections.length} plants found</span>
-                    <span>{sample.swaps.length} native swaps</span>
-                    <span className="inline-flex items-center gap-1 text-[#3f7d45] font-bold">
-                      Explore audit <ChevronRight className="h-3 w-3" />
+
+                  {/* ZIP & Action Row */}
+                  <div className="flex flex-col gap-2.5 sm:flex-row pt-1">
+                    <label className="zip-field flex-1">
+                      <MapPin className="h-4 w-4 shrink-0 text-[#6b7a68]" />
+                      <span className="sr-only">ZIP code</span>
+                      <input
+                        name="yard-location-code"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        value={zip}
+                        onChange={(event) =>
+                          onZip(event.target.value.replace(/\D/g, "").slice(0, 5))
+                        }
+                        inputMode="numeric"
+                        maxLength={5}
+                        placeholder="NJ ZIP"
+                        aria-label="Yard ZIP code"
+                      />
+                      <span className="whitespace-nowrap text-[0.64rem] font-bold uppercase tracking-[0.1em] text-[#8b9182]">
+                        {region.county && region.county !== "New Jersey"
+                          ? `${region.county} County`
+                          : `Zone ${region.zone}`}
+                      </span>
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={onStart}
+                      className="btn btn-lime justify-center px-6 py-3 text-xs sm:text-sm font-bold sm:min-w-[12rem]"
+                    >
+                      Audit my yard now
+                      <ArrowUpRight className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {zipInvalid ? (
+                    <p className="rounded-xl bg-[#fae8e1] px-3 py-2 text-[0.76rem] font-semibold text-[#a34832]">
+                      NativeYard NJ is calibrated for New Jersey ZIP codes (07000–08999). Try 07645 for the sample region.
+                    </p>
+                  ) : region.notice ? (
+                    <p className="rounded-xl bg-[#faf1dc] px-3 py-2 text-[0.72rem] font-semibold leading-5 text-[#7b6228]">
+                      {region.notice}
+                    </p>
+                  ) : null}
+
+                  {error ? (
+                    <p className="rounded-xl bg-[#fae8e1] px-3 py-2 text-[0.76rem] font-semibold text-[#a34832]">
+                      {error}
+                    </p>
+                  ) : null}
+
+                  {/* Footer Context / Privacy Line */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#ede7d5] pt-3 text-[0.72rem] text-[#6b7a68]">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck className="h-3.5 w-3.5 text-[#2f7d3a]" />
+                      {user
+                        ? `Authenticated as ${user.email} · Scans auto-save to your account`
+                        : "Runs instantly in your browser session"}
                     </span>
+                    {!user && onOpenAuth && (
+                      <button
+                        type="button"
+                        onClick={onOpenAuth}
+                        className="font-bold text-[#163f2c] hover:text-[#2f7d3a] underline underline-offset-2"
+                      >
+                        Want to save &amp; reload later? Sign in
+                      </button>
+                    )}
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className="absolute -left-3 top-[30%] hidden rotate-[-4deg] rounded-2xl border border-[#d8d3bf] bg-[#fbfaf4] px-3.5 py-3 shadow-lg sm:block">
-                <p className="flex items-center gap-1.5 text-[0.61rem] font-bold uppercase tracking-[0.1em] text-[#7a806e]">
-                  <Bug className="h-3.5 w-3.5 text-[#3f7d45]" />
-                  Caterpillar hosts
-                </p>
-                <p className="mt-1 font-display text-xl font-semibold text-[#163f2c]">
-                  {sample.hostGenera} genera
-                </p>
-              </div>
+              {/* Mode 2: Try Live NJ Sample Yards */}
+              {launchpadMode === "sample" && (
+                <div className="p-5 sm:p-7 space-y-4 animate-fade-in">
+                  {/* Scenario switcher pills */}
+                  <div className="grid grid-cols-3 gap-2 w-full">
+                    {(["front-yard", "back-yard", "side-yard"] as const).map((key) => {
+                      const cfg = SAMPLE_YARDS[key];
+                      const isSelected = currentKey === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => onSelectSample?.(key)}
+                          className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2.5 rounded-xl text-xs font-bold transition ${
+                            isSelected
+                              ? "bg-[#163f2c] text-[#d7f27a] shadow-sm ring-1 ring-[#163f2c]"
+                              : "bg-[#ede7d5]/60 text-[#3a4d3f] hover:bg-[#ede7d5] border border-[#d8d3bf]/60"
+                          }`}
+                        >
+                          <span>{key === "front-yard" ? "🏡 Front Yard" : key === "back-yard" ? "🌸 Backyard" : "🌲 Side Yard"}</span>
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+                              isSelected ? "bg-[#25523b] text-[#d7f27a]" : "bg-black/5 text-[#5d6b60]"
+                            }`}
+                          >
+                            Score {cfg.initialScore}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              <div className="absolute -right-3 top-[30%] hidden rotate-[3deg] rounded-2xl border border-[#d8d3bf] bg-[#fbfaf4] px-3.5 py-3 shadow-lg sm:block">
-                <p className="flex items-center gap-1.5 text-[0.61rem] font-bold uppercase tracking-[0.1em] text-[#7a806e]">
-                  <Bird className="h-3.5 w-3.5 text-[#a87a2c]" />
-                  Invasive load
-                </p>
-                <p className="mt-1 font-display text-xl font-semibold text-[#b6533d]">
-                  {sample.invasiveShare}%
-                </p>
-              </div>
+                  {/* Sample Photo Preview */}
+                  <div
+                    onClick={() => handleLaunch(currentKey)}
+                    className="relative h-[22rem] sm:h-[25rem] w-full overflow-hidden rounded-2xl border border-[#d8d3bf] bg-[#dfe7d3] shadow-md cursor-pointer group"
+                    title={`Click to open ${currentSampleConfig.name} audit report`}
+                  >
+                    <img
+                      src={currentSampleConfig.filename}
+                      alt={currentSampleConfig.name}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#10291d]/80 via-transparent to-[#10291d]/20" />
+
+                    <div className="absolute left-3.5 top-3.5 flex items-center gap-2 rounded-full border border-white/20 bg-[#10291d]/85 px-3 py-1.5 text-xs font-bold text-[#f7f4e9] backdrop-blur">
+                      <ScanLine className="h-3.5 w-3.5 text-[#d7f27a]" />
+                      <span>{currentSampleConfig.name}</span>
+                    </div>
+
+                    <div className="absolute right-3.5 top-3.5 hidden sm:flex items-center gap-1.5 rounded-full border border-white/20 bg-[#10291d]/85 px-3 py-1.5 text-[11px] font-bold text-[#d7f27a] backdrop-blur transition group-hover:bg-[#163f2c]">
+                      <span>Open audit</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </div>
+
+                    {/* Floating Sample Plant Tags */}
+                    {sample.detections.slice(0, 3).map((det, idx) => {
+                      const plant = getPlant(det.plantId);
+                      if (!plant) return null;
+                      const chipClass =
+                        plant.status === "invasive"
+                          ? "detection-chip--invasive"
+                          : plant.status === "keystone"
+                            ? "detection-chip--keystone"
+                            : "detection-chip--native";
+                      const posClass =
+                        idx === 0
+                          ? "right-4 top-[22%]"
+                          : idx === 1
+                            ? "left-[8%] top-[38%]"
+                            : "right-[12%] top-[48%]";
+
+                      return (
+                        <div key={det.id} className={`absolute ${posClass} detection-chip ${chipClass}`}>
+                          <span className="detection-chip__dot" />
+                          {plant.commonName}
+                          <span className="detection-chip__status">
+                            {plant.status === "keystone" ? "Keystone" : plant.status === "invasive" ? "Invasive" : "Native"}
+                          </span>
+                        </div>
+                      );
+                    })}
+
+                    {/* Clean Score Bar Overlay */}
+                    <div className="absolute inset-x-3.5 bottom-3.5 rounded-xl border border-white/20 bg-[#f7f4e9]/95 p-3.5 shadow-xl backdrop-blur">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-[0.62rem] font-bold uppercase tracking-wider text-[#7a806e]">
+                            Yard biodiversity score
+                          </p>
+                          <p className="mt-0.5 font-display text-2xl font-bold text-[#163f2c]">
+                            {sample.score}
+                            <span className="text-xs font-normal text-[#8b9182]">/100</span>
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-[#faf1dc] px-2.5 py-1 text-[0.65rem] font-bold uppercase text-[#a87a2c]">
+                          {sample.scoreLabel}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between text-xs font-semibold text-[#6b7a68]">
+                        <span>{sample.detections.length} plants cataloged</span>
+                        <span>{sample.swaps.length} native replacements</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Single Minimalistic Action Button */}
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={() => handleLaunch(currentKey)}
+                      className="btn btn-lime w-full justify-center py-3.5 text-sm sm:text-base font-bold shadow-md hover:shadow-lg transition flex items-center gap-2"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      <span>Open {currentSampleConfig.name} Audit Report</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>

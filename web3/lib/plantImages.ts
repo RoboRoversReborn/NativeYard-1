@@ -239,7 +239,12 @@ export const PLANT_IMAGES: Record<string, string> = {
   "Campsis radicans": "/plants/campsis-radicans.jpg",
 };
 
-export function getPlantImage(sci?: string | null, common?: string | null): string | null {
+export function getPlantImage(
+  sci?: string | null,
+  common?: string | null,
+  explicitUrl?: string | null
+): string | null {
+  if (explicitUrl) return explicitUrl;
   if (!sci) return null;
   if (PLANT_IMAGES[sci]) return PLANT_IMAGES[sci];
   // Try genus match
@@ -251,3 +256,4 @@ export function getPlantImage(sci?: string | null, common?: string | null): stri
   }
   return null;
 }
+

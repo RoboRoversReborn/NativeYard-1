@@ -640,6 +640,81 @@
     opacity: 0.65;
   }
 
+  /* Responsive Adaptive Layout for Audit View (Phone vs Tablet vs Desktop) */
+  .audit-adaptive-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-areas:
+      "score"
+      "tally"
+      "photo"
+      "chips"
+      "inspector"
+      "list";
+  }
+
+  .audit-grid-score {
+    grid-area: score;
+    min-width: 0;
+  }
+
+  .audit-grid-tally {
+    grid-area: tally;
+    min-width: 0;
+  }
+
+  .audit-grid-photo {
+    grid-area: photo;
+    min-width: 0;
+  }
+
+  .audit-grid-chips {
+    grid-area: chips;
+    min-width: 0;
+  }
+
+  .audit-grid-inspector {
+    grid-area: inspector;
+    min-width: 0;
+  }
+
+  .audit-grid-list {
+    grid-area: list;
+    min-width: 0;
+  }
+
+  /* Tablet (768px to 1279px): Executive Summary on top, Side-by-side workspace below */
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .audit-adaptive-grid {
+      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-areas:
+        "score tally"
+        "photo inspector"
+        "photo list";
+      align-items: start;
+    }
+
+    .audit-grid-chips {
+      display: none;
+    }
+  }
+
+  /* Desktop (1280px and up): Dual-Column Power Workspace */
+  @media (min-width: 1280px) {
+    .audit-adaptive-grid {
+      grid-template-columns: 1.25fr 0.75fr;
+      grid-template-areas:
+        "photo score"
+        "photo inspector"
+        "tally list";
+      align-items: start;
+    }
+
+    .audit-grid-chips {
+      display: none;
+    }
+  }
+
   .scan-line {
     position: absolute;
     left: 0;

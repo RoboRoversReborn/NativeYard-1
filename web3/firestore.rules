@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: is curator/admin
+    function isAdmin() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/admin_users/$(request.auth.uid));
+    }
+
+    // Flora catalog: anyone can read, only admin can write
+    match /plants/{plantId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admin user directory
+    match /admin_users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Properties: owner can read, write, create, delete
+    match /properties/{propertyId} {
+      allow read: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.user_id == request.auth.uid;
+
+      // Subcollection yard_areas
+      match /yard_areas/{areaId} {
+        allow read, write: if isAuthenticated();
+
+        // Subcollection yard_scans
+        match /yard_scans/{scanId} {
+          allow read, write: if isAuthenticated();
+        }
+      }
+    }
+  }
+}

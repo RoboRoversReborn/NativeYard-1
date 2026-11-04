@@ -3,6 +3,7 @@
 
 import { Check, Loader2, ScanLine, Sparkles } from "lucide-react";
 import { Brand } from "./brand";
+import { HeaderAuth } from "./header-auth";
 
 const STEPS = [
   "Detecting plant forms",
@@ -14,19 +15,46 @@ const STEPS = [
 export function AnalyzingView({
   photo,
   step,
+  user,
+  onOpenAuth,
+  onSignOut,
+  onOpenPropertyManager,
 }: {
   photo: string;
   step: number;
+  user?: any;
+  onOpenAuth?: () => void;
+  onSignOut?: () => void;
+  onOpenPropertyManager?: () => void;
 }) {
   return (
     <div className="min-h-screen bg-[#f7f4e9] text-[#1d2a21]">
       <header className="site-header no-print">
-        <div className="container-shell flex h-[4.5rem] items-center justify-between">
-          <Brand />
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-[0.1em] text-[#5d6b60]">
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-[#3f7d45]" />
-            Analyzing
-          </span>
+        <div className="container-shell flex h-[4.5rem] items-center justify-between gap-4">
+          <div className="flex items-center gap-5">
+            <Brand />
+            <a
+              className="nav-link hidden lg:flex items-center gap-1 font-bold text-[#2f7d3a] hover:text-[#163f2c] text-xs"
+              href="/admin/plants"
+            >
+              <span>🌿</span>
+              <span>Flora Database</span>
+            </a>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-[0.1em] text-[#5d6b60]">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-[#3f7d45]" />
+              Analyzing
+            </span>
+            <div className="border-l border-[#d8d3bf] pl-2">
+              <HeaderAuth
+                user={user}
+                onOpenAuth={onOpenAuth}
+                onSignOut={onSignOut}
+                onOpenPropertyManager={onOpenPropertyManager}
+              />
+            </div>
+          </div>
         </div>
       </header>
 

@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import { Brand } from "./brand";
+import { HeaderAuth } from "./header-auth";
 import { ScoreRing } from "./score-ring";
 import { StatusBadge } from "./status-badge";
 import { BoundingBoxOverlay } from "./canvas/BoundingBoxOverlay";
@@ -48,6 +49,11 @@ type AuditViewProps = {
   onReport: () => void;
   onReset: () => void;
   onHome: () => void;
+  user?: any;
+  onOpenAuth?: () => void;
+  onSignOut?: () => void;
+  onOpenPropertyManager?: () => void;
+  propertyBar?: React.ReactNode;
 };
 
 const NJ_STATUS_ORDER: NjPlantStatus[] = [
@@ -65,6 +71,11 @@ export function AuditView({
   onReport,
   onReset,
   onHome,
+  user,
+  onOpenAuth,
+  onSignOut,
+  onOpenPropertyManager,
+  propertyBar,
 }: AuditViewProps) {
   const [selectedId, setSelectedId] = useState(
     audit.detections.find((detection) => getPlant(detection.plantId)?.status === "invasive")
@@ -334,13 +345,24 @@ export function AuditView({
 
   return (
     <div className="min-h-screen bg-[#f4f1e6] text-[#1d2a21]">
-      <header className="app-header no-print">
-        <div className="container-shell flex h-16 items-center justify-between gap-4">
-          <button type="button" onClick={onHome} aria-label="Back to NativeYard home">
-            <Brand />
-          </button>
+      <header className="site-header no-print">
+        <div className="container-shell flex h-[4.5rem] items-center justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <button type="button" onClick={onHome} aria-label="Back to NativeYard home">
+              <Brand />
+            </button>
+            <nav className="hidden items-center gap-5 text-[0.84rem] font-semibold text-[#425445] lg:flex">
+              <a
+                className="nav-link flex items-center gap-1 font-bold text-[#2f7d3a] hover:text-[#163f2c]"
+                href="/admin/plants"
+              >
+                <span>🌿</span>
+                <span>Flora Database</span>
+              </a>
+            </nav>
+          </div>
 
-          <div className="hidden items-center gap-1 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] p-1 text-[0.68rem] font-bold sm:flex">
+          <div className="hidden items-center gap-1 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] p-1 text-[0.68rem] font-bold md:flex">
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[#7a806e]">
               <Check className="h-3.5 w-3.5 text-[#3f7d45]" />
               Photo
@@ -349,17 +371,21 @@ export function AuditView({
               <ScanLine className="h-3.5 w-3.5 text-[#d7f27a]" />
               Yard audit
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[#9a9f91]">
+            <button
+              type="button"
+              onClick={onReport}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[#5d6b60] hover:text-[#163f2c] transition"
+            >
               <FileText className="h-3.5 w-3.5" />
               Report
-            </span>
+            </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={onReset}
-              className="hidden items-center gap-1.5 rounded-full border border-[#d8d3bf] bg-[#fbfaf4] px-3.5 py-2 text-[0.72rem] font-bold text-[#5d6b60] transition hover:border-[#b9b4a2] hover:text-[#163f2c] sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-full border border-[#d8d3bf] bg-white px-3 py-1.5 text-xs font-bold text-[#5d6b60] transition hover:bg-[#ece8d9] hover:text-[#163f2c] sm:inline-flex"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               New audit
@@ -367,14 +393,25 @@ export function AuditView({
             <button
               type="button"
               onClick={onReport}
-              className="btn btn-dark px-4 py-2 text-[0.72rem]"
+              className="btn btn-dark px-3.5 py-1.5 text-xs font-bold"
             >
               View report
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
+
+            <div className="border-l border-[#d8d3bf] pl-2.5 ml-1">
+              <HeaderAuth
+                user={user}
+                onOpenAuth={onOpenAuth}
+                onSignOut={onSignOut}
+                onOpenPropertyManager={onOpenPropertyManager}
+              />
+            </div>
           </div>
         </div>
       </header>
+
+      {propertyBar}
 
       <main className="container-shell pb-16 pt-7 sm:pt-10">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -441,9 +478,49 @@ export function AuditView({
           </div>
         )}
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
-          <div className="min-w-0 space-y-4">
-            <section className="overflow-hidden rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] shadow-[0_18px_45px_rgba(45,61,42,0.08)]">
+        <div className="mt-6 audit-adaptive-grid">
+          {/* 1. Overall Yard Biodiversity Score Hero Card (Executive Summary) */}
+          <section className="audit-grid-score overflow-hidden rounded-[1.6rem] bg-[#163f2c] p-5 text-[#f7f4e9] shadow-[0_18px_45px_rgba(22,63,44,0.2)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="eyebrow text-[0.61rem] text-[#a9c67a]">
+                  Yard biodiversity score
+                </p>
+                <p className="mt-1 font-display text-[1.5rem] font-semibold leading-none">
+                  {audit.scoreLabel}
+                </p>
+                <p className="mt-2 max-w-[15rem] text-[0.68rem] leading-5 text-[#c7d3bd]">
+                  Based on native cover, invasive pressure, host genera, and
+                  keystone presence.
+                </p>
+              </div>
+              <ScoreRing score={audit.score} size={104} />
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-white/10 pt-4">
+              {audit.metrics.map((metric) => (
+                <div key={metric.label}>
+                  <p className="text-[0.58rem] font-bold uppercase tracking-[0.1em] text-[#a9b59e]">
+                    {metric.label}
+                  </p>
+                  <p
+                    className={`mt-0.5 font-display text-[1.25rem] font-semibold leading-none ${
+                      metric.tone === "bad"
+                        ? "text-[#f0a38e]"
+                        : metric.tone === "warn"
+                          ? "text-[#f2d18d]"
+                          : "text-[#d7f27a]"
+                    }`}
+                  >
+                    {metric.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 3. Interactive Yard Photo with Bounding Boxes */}
+          <section className="audit-grid-photo overflow-hidden rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] shadow-[0_18px_45px_rgba(45,61,42,0.08)]">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5e0d1] px-4 py-3 sm:px-5">
                 <div className="flex items-center gap-2">
                   <span className="grid h-8 w-8 place-items-center rounded-full bg-[#163f2c] text-[#d7f27a]">
@@ -480,7 +557,17 @@ export function AuditView({
                   photoUrl={photo}
                   selectedId={selectedId}
                   orderedDetections={sortedDetections}
-                  onSelectDetection={(id) => setSelectedId(id)}
+                  onSelectDetection={(id) => {
+                  setSelectedId(id);
+                  if (typeof window !== "undefined" && window.innerWidth < 768) {
+                    setTimeout(() => {
+                      const el = document.getElementById("selected-plant-inspector");
+                      if (el) {
+                        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                      }
+                    }, 50);
+                  }
+                }}
                   onDeleteDetection={(id) => removeDetection(id)}
                   onUpdateDetectionBox={(id, newBox) => {
                     const next = audit.detections.map((d) =>
@@ -528,8 +615,65 @@ export function AuditView({
               </div>
             </section>
 
-            {/* Complete Plant Inventory & Ecological Breakdown Tally */}
-            <div className="rounded-2xl border border-[#d5cfbd] bg-[#fbfaf4] p-4 sm:p-5 shadow-xs">
+          {/* 4. Quick-Switch Horizontal Plant Chips Bar (Mobile Only) */}
+          <div className="audit-grid-chips">
+            <div className="flex items-center justify-between gap-2 px-1 mb-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#7a806e]">
+                Jump to plant in frame:
+              </span>
+              <span className="text-[11px] text-[#8b9182]">
+                {sortedDetections.length} detected
+              </span>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 pt-0.5 no-scrollbar">
+              {sortedDetections.map((detection, index) => {
+                const plant = getPlant(detection.plantId);
+                const isSelected = detection.id === selectedId;
+                const isVerified = Boolean(detection.verified);
+                const meta = getStatusMeta(plant ?? { status: "native" });
+                return (
+                  <button
+                    key={detection.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedId(detection.id);
+                      if (typeof window !== "undefined" && window.innerWidth < 768) {
+                        setTimeout(() => {
+                          const el = document.getElementById("selected-plant-inspector");
+                          if (el) {
+                            el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                          }
+                        }, 50);
+                      }
+                    }}
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition shadow-xs ${
+                      isSelected
+                        ? "bg-[#163f2c] text-[#f7f4e9] ring-2 ring-[#d7f27a] shadow-md"
+                        : "bg-[#fbfaf4] text-[#1d2a21] border border-[#d8d3bf] hover:bg-[#ede7d5]"
+                    }`}
+                  >
+                    <span
+                      className="grid h-4 w-4 place-items-center rounded-full text-[9px] text-white"
+                      style={{ background: isVerified ? "#2e7d32" : meta.color }}
+                    >
+                      {index + 1}
+                    </span>
+                    <span className="truncate max-w-[120px]">{plant?.commonName || detection.plantId}</span>
+                    {isVerified ? (
+                      <Check className="h-3 w-3 stroke-[3] text-[#4caf50]" />
+                    ) : (
+                      <span className="text-[10px] text-[#8a6420]">
+                        {Math.round(detection.confidence * 100)}%
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 2. Complete Plant Inventory & Ecological Breakdown Tally */}
+          <section className="audit-grid-tally rounded-2xl border border-[#d5cfbd] bg-[#fbfaf4] p-4 sm:p-5 shadow-xs">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5e0d1] pb-3 mb-3.5">
                 <div>
                   <h3 className="text-[0.82rem] font-bold text-[#163f2c]">
@@ -546,7 +690,7 @@ export function AuditView({
 
               {/* 5-Column Exact Plant Tally: Total = Keystone + Native + Non-native + Invasive */}
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                <div className="rounded-xl border border-[#d9d4c4] bg-[#f7f5ec] p-2.5 text-center">
+                <div className="col-span-2 sm:col-span-1 rounded-xl border border-[#d9d4c4] bg-[#f7f5ec] p-2.5 text-center">
                   <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#7a806e]">
                     Total Plants
                   </p>
@@ -609,52 +753,15 @@ export function AuditView({
                   <span className="font-bold text-[#b6533d]">{audit.invasiveShare}%</span> invasive cover pressure
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <section className="overflow-hidden rounded-[1.6rem] bg-[#163f2c] p-5 text-[#f7f4e9] shadow-[0_18px_45px_rgba(22,63,44,0.2)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="eyebrow text-[0.61rem] text-[#a9c67a]">
-                    Yard biodiversity score
-                  </p>
-                  <p className="mt-1 font-display text-[1.5rem] font-semibold leading-none">
-                    {audit.scoreLabel}
-                  </p>
-                  <p className="mt-2 max-w-[15rem] text-[0.68rem] leading-5 text-[#c7d3bd]">
-                    Based on native cover, invasive pressure, host genera, and
-                    keystone presence.
-                  </p>
-                </div>
-                <ScoreRing score={audit.score} size={104} />
-              </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-white/10 pt-4">
-                {audit.metrics.map((metric) => (
-                  <div key={metric.label}>
-                    <p className="text-[0.58rem] font-bold uppercase tracking-[0.1em] text-[#a9b59e]">
-                      {metric.label}
-                    </p>
-                    <p
-                      className={`mt-0.5 font-display text-[1.25rem] font-semibold leading-none ${
-                        metric.tone === "bad"
-                          ? "text-[#f0a38e]"
-                          : metric.tone === "warn"
-                            ? "text-[#f2d18d]"
-                            : "text-[#d7f27a]"
-                      }`}
-                    >
-                      {metric.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
             </section>
 
-            {selectedPlant && selectedDetection && (
-              <section className="rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] p-5">
-                <div className="flex items-start justify-between gap-3">
+          {/* 5. Selected Plant Detail & Verification Inspector */}
+          {selectedPlant && selectedDetection && (
+            <section
+              id="selected-plant-inspector"
+              className="audit-grid-inspector rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] p-5 shadow-xs"
+            >
+              <div className="flex items-start justify-between gap-3">
                   <StatusBadge
                     status={selectedPlant.status}
                     njStatus={selectedPlant.njStatus}
@@ -906,7 +1013,8 @@ export function AuditView({
               </section>
             )}
 
-            <section className="rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4]">
+            {/* 6. Complete "Plants in this frame" List */}
+            <section className="audit-grid-list rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] shadow-xs">
               <div className="flex items-center justify-between border-b border-[#e5e0d1] px-4 py-3">
                 <p className="text-[0.74rem] font-bold text-[#263b2b]">
                   Plants in this frame
@@ -990,7 +1098,6 @@ export function AuditView({
                 })}
               </div>
             </section>
-          </div>
         </div>
 
         <section className="mt-6 overflow-hidden rounded-[1.8rem] bg-[#163f2c] p-5 text-[#f7f4e9] sm:p-7">

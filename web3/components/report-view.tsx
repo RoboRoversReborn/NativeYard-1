@@ -25,6 +25,7 @@ import {
   Waves,
 } from "lucide-react";
 import { Brand } from "./brand";
+import { HeaderAuth } from "./header-auth";
 import { ScoreRing } from "./score-ring";
 import { StatusBadge } from "./status-badge";
 import {
@@ -42,6 +43,10 @@ type ReportViewProps = {
   onBack: () => void;
   onReset: () => void;
   onHome: () => void;
+  user?: any;
+  onOpenAuth?: () => void;
+  onSignOut?: () => void;
+  onOpenPropertyManager?: () => void;
 };
 
 const CALENDAR = [
@@ -81,6 +86,10 @@ export function ReportView({
   onBack,
   onReset,
   onHome,
+  user,
+  onOpenAuth,
+  onSignOut,
+  onOpenPropertyManager,
 }: ReportViewProps) {
   const sortedDetections = useMemo(() => {
     const rank: Record<string, number> = {
@@ -219,6 +228,13 @@ export function ReportView({
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to audit
             </button>
+            <a
+              href="/admin/plants"
+              className="hidden lg:inline-flex items-center gap-1 text-[0.76rem] font-bold text-[#2f7d3a] hover:text-[#163f2c]"
+            >
+              <span>🌿</span>
+              <span>Flora Database</span>
+            </a>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -255,6 +271,14 @@ export function ReportView({
               <Printer className="h-3.5 w-3.5" />
               Print
             </button>
+            <div className="border-l border-[#d0cbb9] pl-2 ml-1">
+              <HeaderAuth
+                user={user}
+                onOpenAuth={onOpenAuth}
+                onSignOut={onSignOut}
+                onOpenPropertyManager={onOpenPropertyManager}
+              />
+            </div>
           </div>
         </div>
         <div className="container-shell pb-2 text-right text-[0.62rem] text-[#8b9182] sm:hidden">

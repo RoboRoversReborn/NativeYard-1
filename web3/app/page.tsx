@@ -12,13 +12,13 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { buildDemoAudit } from "@/lib/plants";
 import { isNjZip } from "@/lib/nj-data";
 import { compressImageFile, isMobileOrTablet } from "@/lib/camera";
-import { createClient } from "@/lib/supabase/client";
+import { onAuthChange, signOutUser } from "@/lib/firebase/auth";
 import {
   getPropertiesWithAreas,
   createProperty,
   createYardArea,
   saveYardScan,
-} from "@/lib/supabase/properties";
+} from "@/lib/firebase/properties";
 import { SAMPLE_YARDS, buildSampleAudit, SampleYardKey } from "@/lib/sampleDetections";
 import type { Audit, Property, YardArea, YardScan } from "@/lib/types";
 
@@ -43,7 +43,7 @@ export default function NativeYardV3() {
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
-  // Supabase Auth & Property State
+  // Firebase Auth & Property State
   const [user, setUser] = useState<any>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -54,20 +54,9 @@ export default function NativeYardV3() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [stage]);
 
-  // Check auth & load properties
+  // Check auth & load properties via Firebase Auth
   useEffect(() => {
-    const supabase = createClient();
-    if (!supabase) return;
-
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      if (user) loadProperties();
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user || null;
+    const unsubscribe = onAuthChange((currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         loadProperties();
@@ -78,7 +67,7 @@ export default function NativeYardV3() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   async function loadProperties() {
@@ -141,8 +130,19 @@ export default function NativeYardV3() {
     }
   }
 
+  function handleLaunchSample(sampleKey?: SampleYardKey) {
+    const key = sampleKey || selectedSampleKey || "front-yard";
+    const sampleConfig = SAMPLE_YARDS[key] || SAMPLE_YARDS["front-yard"];
+    setSelectedSampleKey(key);
+    setPhoto(sampleConfig.filename);
+    setIsSample(true);
+    setError("");
+    setAudit(buildSampleAudit(key, zip));
+    setStage("audit");
+  }
+
   function handleSample() {
-    handleSelectSampleYard("front-yard");
+    handleLaunchSample(selectedSampleKey || "front-yard");
   }
 
   function handleClearPhoto() {
@@ -280,41 +280,37 @@ export default function NativeYardV3() {
     setScanStep(0);
   }
 
+  const propertyBarNode = (
+    <PropertyBar
+      properties={properties}
+      selectedProperty={selectedProperty}
+      selectedArea={selectedArea}
+      onSelectProperty={(prop) => {
+        setSelectedProperty(prop);
+        if (prop.yard_areas && prop.yard_areas.length > 0) {
+          setSelectedArea(prop.yard_areas[0]);
+        }
+      }}
+      onSelectArea={setSelectedArea}
+      onOpenPropertyManager={() => setShowPropertyModal(true)}
+      onSaveCurrentScan={handleSaveCurrentScan}
+      isSavingScan={isSavingScan}
+      canSaveScan={Boolean(audit && stage === "audit")}
+      user={user}
+      onOpenAuth={() => setShowAuthModal(true)}
+      onSignOut={signOutUser}
+      onTriggerCamera={handleTriggerCamera}
+      onTriggerUpload={() => uploadInputRef.current?.click()}
+      onSelectSampleYard={(key) => {
+        handleSelectSampleYard(key);
+        setStage("audit");
+      }}
+      selectedSampleKey={selectedSampleKey}
+    />
+  );
+
   return (
     <div className="min-h-screen bg-[#f7f4e9] text-[#1d2a21] flex flex-col">
-      {/* Sticky Top Property & Account Bar (hidden during report & PDF export) */}
-      {stage !== "report" && (
-        <PropertyBar
-          properties={properties}
-          selectedProperty={selectedProperty}
-          selectedArea={selectedArea}
-          onSelectProperty={(prop) => {
-            setSelectedProperty(prop);
-            if (prop.yard_areas && prop.yard_areas.length > 0) {
-              setSelectedArea(prop.yard_areas[0]);
-            }
-          }}
-          onSelectArea={setSelectedArea}
-          onOpenPropertyManager={() => setShowPropertyModal(true)}
-          onSaveCurrentScan={handleSaveCurrentScan}
-          isSavingScan={isSavingScan}
-          canSaveScan={Boolean(audit && stage === "audit")}
-          user={user}
-          onOpenAuth={() => setShowAuthModal(true)}
-          onSignOut={async () => {
-            const supabase = createClient();
-            if (supabase) await supabase.auth.signOut();
-          }}
-          onTriggerCamera={handleTriggerCamera}
-          onTriggerUpload={() => uploadInputRef.current?.click()}
-          onSelectSampleYard={(key) => {
-            handleSelectSampleYard(key);
-            setStage("audit");
-          }}
-          selectedSampleKey={selectedSampleKey}
-        />
-      )}
-
       {/* Hidden Global Upload Trigger */}
       <input
         type="file"
@@ -345,7 +341,14 @@ export default function NativeYardV3() {
       {/* Main View Router */}
       <div className="flex-1">
         {stage === "analyzing" && (
-          <AnalyzingView photo={photo ?? SAMPLE_YARDS[selectedSampleKey].filename} step={scanStep} />
+          <AnalyzingView
+            photo={photo ?? SAMPLE_YARDS[selectedSampleKey].filename}
+            step={scanStep}
+            user={user}
+            onOpenAuth={() => setShowAuthModal(true)}
+            onSignOut={signOutUser}
+            onOpenPropertyManager={() => setShowPropertyModal(true)}
+          />
         )}
 
         {stage === "audit" && audit && (
@@ -356,6 +359,11 @@ export default function NativeYardV3() {
             onReport={() => setStage("report")}
             onReset={handleReset}
             onHome={() => setStage("landing")}
+            user={user}
+            onOpenAuth={() => setShowAuthModal(true)}
+            onSignOut={signOutUser}
+            onOpenPropertyManager={() => setShowPropertyModal(true)}
+            propertyBar={propertyBarNode}
           />
         )}
 
@@ -366,6 +374,10 @@ export default function NativeYardV3() {
             onBack={() => setStage("audit")}
             onReset={handleReset}
             onHome={() => setStage("landing")}
+            user={user}
+            onOpenAuth={() => setShowAuthModal(true)}
+            onSignOut={signOutUser}
+            onOpenPropertyManager={() => setShowPropertyModal(true)}
           />
         )}
 
@@ -378,6 +390,7 @@ export default function NativeYardV3() {
             onPhoto={handlePhoto}
             onSample={handleSample}
             onSelectSample={handleSelectSampleYard}
+            onLaunchSample={handleLaunchSample}
             selectedSampleKey={selectedSampleKey}
             onClearPhoto={handleClearPhoto}
             onZip={(value) => {
@@ -386,6 +399,20 @@ export default function NativeYardV3() {
             }}
             onStart={handleStart}
             onTriggerCamera={handleTriggerCamera}
+            user={user}
+            properties={properties}
+            selectedProperty={selectedProperty}
+            selectedArea={selectedArea}
+            onSelectProperty={(prop) => {
+              setSelectedProperty(prop);
+              if (prop.yard_areas && prop.yard_areas.length > 0) {
+                setSelectedArea(prop.yard_areas[0]);
+              }
+            }}
+            onSelectArea={setSelectedArea}
+            onOpenAuth={() => setShowAuthModal(true)}
+            onSignOut={signOutUser}
+            onOpenPropertyManager={() => setShowPropertyModal(true)}
           />
         )}
       </div>

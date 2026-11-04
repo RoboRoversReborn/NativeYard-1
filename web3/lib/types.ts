@@ -67,6 +67,7 @@ export type Plant = {
   bloomMonths?: number[];
   matureHeightFt?: [number, number];
   ornamentalFeatures?: NjOrnamentalFeature[];
+  imageUrl?: string;
 };
 
 export type BoundingBox = {
@@ -280,7 +281,7 @@ export type NjDataset = {
   synonyms: NjSynonym[];
 };
 
-// Supabase Property Management Models
+// Property Management Models (Firestore / Cloud Database)
 export interface Property {
   id: string;
   user_id: string;

@@ -56,7 +56,7 @@ export function PropertyBar({
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   return (
-    <div className="no-print w-full border-b border-[#ede7d5] bg-[#fbfaf4]/95 backdrop-blur-md sticky top-0 z-40 transition-all">
+    <div className="no-print w-full border-b border-[#ede7d5] bg-[#fbfaf4]/95 backdrop-blur-md sticky top-[4.5rem] z-30 transition-all">
       <div className="container-shell flex flex-wrap items-center justify-between gap-3 py-2.5">
         {/* Left: Property & Area Selector */}
         <div className="flex flex-wrap items-center gap-2">
@@ -127,12 +127,12 @@ export function PropertyBar({
           ) : (
             <div className="flex items-center gap-2 text-xs text-[#8b9182]">
               <span className="flex h-2 w-2 rounded-full bg-[#3f7d45]" />
-              <span>Sign in to save yard areas & historical scans</span>
+              <span>Sign in above to save yard areas &amp; track historical scans</span>
             </div>
           )}
         </div>
 
-        {/* Right: Quick Capture, 3 Sample Yards, Save Scan & Auth Profile */}
+        {/* Right: Quick Capture, 3 Sample Yards & Save Scan */}
         <div className="flex flex-wrap items-center gap-2">
           {/* 3 Sample Yards Quick Switcher */}
           {onSelectSampleYard && (
@@ -214,62 +214,6 @@ export function PropertyBar({
             >
               <Save className="h-3.5 w-3.5" />
               {isSavingScan ? "Saving..." : `Save to ${selectedArea?.name || "Yard"}`}
-            </button>
-          )}
-
-          {user ? (
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-1.5 rounded-full border border-[#ede7d5] bg-white px-2.5 py-1 text-xs font-semibold text-[#163f2c] shadow-xs hover:bg-[#ede7d5]/30"
-              >
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#163f2c] text-[10px] text-[#d7f27a]">
-                  {user.email?.[0]?.toUpperCase() || "U"}
-                </div>
-                <span className="max-w-[100px] truncate text-[11px] font-bold">
-                  {user.user_metadata?.full_name?.split(" ")[0] || user.email?.split("@")[0]}
-                </span>
-                <ChevronDown className="h-3 w-3 text-[#8b9182]" />
-              </button>
-
-              {userDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-48 rounded-xl border border-[#ede7d5] bg-white p-1.5 shadow-xl">
-                  <div className="border-b border-[#ede7d5] px-2.5 py-1.5 text-[11px] text-[#8b9182] truncate">
-                    {user.email}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUserDropdownOpen(false);
-                      onOpenPropertyManager();
-                    }}
-                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs font-medium text-[#163f2c] hover:bg-[#ede7d5]/50"
-                  >
-                    <Layers className="h-3.5 w-3.5 text-[#3f7d45]" />
-                    Properties & Scans
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUserDropdownOpen(false);
-                      onSignOut();
-                    }}
-                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs font-medium text-[#b6533d] hover:bg-[#b6533d]/10"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={onOpenAuth}
-              className="btn bg-[#163f2c] text-[#f7f4e9] px-3 py-1.5 text-xs font-bold hover:bg-[#1e4d37]"
-            >
-              <LogIn className="h-3.5 w-3.5 text-[#d7f27a]" />
-              Sign In
             </button>
           )}
         </div>

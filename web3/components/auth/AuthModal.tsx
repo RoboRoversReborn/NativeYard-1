@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, LogIn, Mail, AlertCircle, CheckCircle } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { X, LogIn, Mail, Lock, AlertCircle, CheckCircle, UserPlus } from "lucide-react";
+import { signInWithEmail, signUpWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
+import { isFirebaseConfigured } from "@/lib/firebase/client";
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -10,7 +11,9 @@ type AuthModalProps = {
 };
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -20,48 +23,49 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       setLoading(true);
       setMsg(null);
-      const supabase = createClient();
-      if (!supabase) throw new Error("Supabase is not configured.");
-
-      const redirectTo = `${window.location.origin}/auth/callback`;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-        },
-      });
-
-      if (error) throw error;
+      if (!isFirebaseConfigured()) {
+        throw new Error("Firebase is not configured in .env.local yet.");
+      }
+      await signInWithGoogle();
+      onClose();
     } catch (err: any) {
-      setMsg({ type: "error", text: err.message || "Failed to initialize Google sign in." });
+      setMsg({ type: "error", text: err.message || "Failed to sign in with Google." });
       setLoading(false);
     }
   };
 
-  const handleMagicLinkSignIn = async (e: React.FormEvent) => {
+  const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !password) return;
 
     try {
       setLoading(true);
       setMsg(null);
-      const supabase = createClient();
-      if (!supabase) throw new Error("Supabase is not configured.");
+      if (!isFirebaseConfigured()) {
+        throw new Error("Firebase is not configured in .env.local yet.");
+      }
 
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+      if (isSignUp) {
+        await signUpWithEmail(email, password);
+        setMsg({ type: "success", text: "Account created successfully!" });
+      } else {
+        await signInWithEmail(email, password);
+        setMsg({ type: "success", text: "Signed in successfully!" });
+      }
 
-      if (error) throw error;
-      setMsg({
-        type: "success",
-        text: "Check your email for the magic sign-in link!",
-      });
+      setTimeout(() => {
+        onClose();
+      }, 700);
     } catch (err: any) {
-      setMsg({ type: "error", text: err.message || "Failed to send magic link." });
+      let friendlyText = err.message || "Authentication failed.";
+      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
+        friendlyText = "Invalid email or password.";
+      } else if (err.code === "auth/email-already-in-use") {
+        friendlyText = "An account with this email already exists. Try signing in.";
+      } else if (err.code === "auth/weak-password") {
+        friendlyText = "Password should be at least 6 characters.";
+      }
+      setMsg({ type: "error", text: friendlyText });
     } finally {
       setLoading(false);
     }
@@ -73,16 +77,18 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md overflow-hidden rounded-2xl border border-[#ede7d5] bg-[#fbfaf4] shadow-2xl"
+        className="w-full max-w-md overflow-hidden rounded-2xl border border-[#ede7d5] bg-[#fbfaf4] shadow-2xl animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#ede7d5] bg-white px-6 py-4">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#163f2c] text-white">
-              <LogIn className="h-3.5 w-3.5" />
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#163f2c] text-[#d7f27a]">
+              {isSignUp ? <UserPlus className="h-3.5 w-3.5" /> : <LogIn className="h-3.5 w-3.5" />}
             </span>
-            <h3 className="font-bold text-sm text-[#163f2c]">Sign in to NativeYard NJ</h3>
+            <h3 className="font-bold text-sm text-[#163f2c]">
+              {isSignUp ? "Create NativeYard Account" : "Sign in to NativeYard NJ"}
+            </h3>
           </div>
           <button
             type="button"
@@ -95,8 +101,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
         {/* Content */}
         <div className="p-6 space-y-4">
-          <p className="text-xs text-[#8b9182] leading-relaxed">
-            Save your yard audits, track invasive removal progress across multiple properties, and export seasonal conservation roadmaps.
+          <p className="text-xs text-[#6b7a68] leading-relaxed">
+            Save your yard audits, track native biodiversity over seasons, and manage front & backyard conservation roadmaps.
           </p>
 
           {msg && (
@@ -149,31 +155,87 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <div className="w-full border-t border-[#ede7d5]" />
             </div>
             <span className="relative bg-[#fbfaf4] px-3 text-[11px] font-semibold text-[#8b9182]">
-              or with email
+              or with email &amp; password
             </span>
           </div>
 
-          {/* Email Magic Link Form */}
-          <form onSubmit={handleMagicLinkSignIn} className="space-y-2.5">
+          {/* Email / Password Form */}
+          <form onSubmit={handleEmailAuth} className="space-y-3">
             <div>
-              <input
-                type="email"
-                required
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-[#ede7d5] bg-white p-2.5 text-xs text-[#163f2c] focus:outline-none focus:ring-2 focus:ring-[#3f7d45]"
-              />
+              <label className="block text-[11px] font-bold text-[#556950] mb-1">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-3.5 w-3.5 text-[#8b9182]" />
+                <input
+                  type="email"
+                  required
+                  placeholder="your.email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-xl border border-[#ede7d5] bg-white p-2.5 pl-9 text-xs text-[#163f2c] focus:outline-none focus:ring-2 focus:ring-[#3f7d45]"
+                />
+              </div>
             </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-[#556950] mb-1">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-3.5 w-3.5 text-[#8b9182]" />
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-xl border border-[#ede7d5] bg-white p-2.5 pl-9 text-xs text-[#163f2c] focus:outline-none focus:ring-2 focus:ring-[#3f7d45]"
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="btn w-full bg-[#163f2c] text-[#d7f27a] font-bold py-2.5 text-xs hover:bg-[#1e4d37]"
+              className="btn w-full bg-[#163f2c] text-[#d7f27a] font-bold py-2.5 text-xs hover:bg-[#1e4d37] transition shadow-xs"
             >
-              <Mail className="h-3.5 w-3.5" />
-              {loading ? "Sending link..." : "Send Magic Link"}
+              {loading
+                ? "Processing..."
+                : isSignUp
+                  ? "Create Account"
+                  : "Sign In"}
             </button>
           </form>
+
+          {/* Toggle Sign In / Sign Up */}
+          <div className="pt-2 text-center text-xs text-[#7a806e]">
+            {isSignUp ? (
+              <span>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(false);
+                    setMsg(null);
+                  }}
+                  className="font-bold text-[#163f2c] hover:underline"
+                >
+                  Sign in
+                </button>
+              </span>
+            ) : (
+              <span>
+                Don&apos;t have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(true);
+                    setMsg(null);
+                  }}
+                  className="font-bold text-[#163f2c] hover:underline"
+                >
+                  Create one free
+                </button>
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>
