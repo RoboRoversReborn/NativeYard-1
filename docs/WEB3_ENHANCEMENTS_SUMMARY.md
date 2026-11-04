@@ -96,7 +96,7 @@ Key milestones achieved:
   - Built automated image harvester using Wikipedia / Wikimedia Commons API with compliant bot headers and Sharp image optimization.
   - Acquired, optimized, and saved all missing botanical photographs into `web3/public/plants/`. **All 238 plants (100%) now have high-resolution images**.
   - Generated complete image lookup in [`web3/lib/plantImages.ts`](file:///Users/niravgadhia/LandscapingApp/web3/lib/plantImages.ts).
-  - Added `plants` database schema and RLS policies to [`supabase/schema.sql`](file:///Users/niravgadhia/LandscapingApp/supabase/schema.sql) and created batch seeder [`web3/scripts/seed-supabase-plants.js`](file:///Users/niravgadhia/LandscapingApp/web3/scripts/seed-supabase-plants.js).
+  - Seeded all 237 curated species directly into Cloud Firestore (`plants` collection) using [`web3/scripts/seed-firebase-plants.mjs`](file:///Users/niravgadhia/LandscapingApp/web3/scripts/seed-firebase-plants.mjs).
   - Built Curator Admin Portal at [`web3/app/admin/plants/page.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/app/admin/plants/page.tsx) with search, status/type filters, table view, add/edit modal, and JSON export.
 
 ### Item 11: Confidence Scores & Verified Status Badges (Replacing '?')
@@ -139,24 +139,24 @@ Key milestones achieved:
 | **Vision & AI Pipeline** | [`web3/app/api/analyze/route.ts`](file:///Users/niravgadhia/LandscapingApp/web3/app/api/analyze/route.ts)<br>[`web3/lib/gemini.ts`](file:///Users/niravgadhia/LandscapingApp/web3/lib/gemini.ts)<br>[`web3/lib/plantnet.ts`](file:///Users/niravgadhia/LandscapingApp/web3/lib/plantnet.ts) | 2-stage ensemble: Gemini organ detection + Sharp crop + Pl@ntNet botanical classification |
 | **Macro Leaf Verification** | [`web3/app/api/identify-macro/route.ts`](file:///Users/niravgadhia/LandscapingApp/web3/app/api/identify-macro/route.ts)<br>[`web3/components/LiveCameraModal.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/components/LiveCameraModal.tsx)<br>[`web3/components/MacroLeafMatcherModal.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/components/MacroLeafMatcherModal.tsx) | Close-up leaf camera viewfinder, Gemini trait diagnosis, candidate matching modal |
 | **Plant Catalog & Picker** | [`web3/components/PlantPickerModal.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/components/PlantPickerModal.tsx)<br>[`web3/data/master-nj-plants.json`](file:///Users/niravgadhia/LandscapingApp/web3/data/master-nj-plants.json)<br>[`web3/lib/plantImages.ts`](file:///Users/niravgadhia/LandscapingApp/web3/lib/plantImages.ts) | 237-species searchable NJ catalog with category tabs, 100% photo assets |
-| **Curator Admin Portal** | [`web3/app/admin/plants/page.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/app/admin/plants/page.tsx)<br>[`web3/scripts/seed-supabase-plants.js`](file:///Users/niravgadhia/LandscapingApp/web3/scripts/seed-supabase-plants.js) | Full database browser, status filters, add/edit modal, and JSON exporter |
+| **Curator Admin Portal** | [`web3/app/admin/plants/page.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/app/admin/plants/page.tsx)<br>[`web3/scripts/seed-firebase-plants.mjs`](file:///Users/niravgadhia/LandscapingApp/web3/scripts/seed-firebase-plants.mjs) | Full database browser, status filters, add/edit modal, and JSON exporter |
 | **Audit View & Canvas** | [`web3/components/audit-view.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/components/audit-view.tsx)<br>[`web3/components/canvas/BoundingBoxOverlay.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/components/canvas/BoundingBoxOverlay.tsx)<br>[`web3/app/globals.css`](file:///Users/niravgadhia/LandscapingApp/web3/app/globals.css) | Responsive adaptive grid, confidence badges, verification workflow, interactive box editor |
 | **Report & PDF Export** | [`web3/components/report-view.tsx`](file:///Users/niravgadhia/LandscapingApp/web3/components/report-view.tsx) | Report view with interactive tags, plant index legend, and direct `jsPDF` file export |
 
 ---
 
-## 4. Database & Future Migration Roadmap
+## 4. Database & Cloud Architecture
 
-1. **Database Schema**:
-   - The PostgreSQL table definition and RLS policies are located in [`supabase/schema.sql`](file:///Users/niravgadhia/LandscapingApp/supabase/schema.sql) (Section 6: `plants` table).
-2. **Seeding Supabase**:
-   - Once the SQL migration is executed in the Supabase SQL Editor, run:
+1. **Cloud Firestore**:
+   - Collections: `plants` (237 NJ botanical species), `properties`, and `admin_users` with security rules deployed via `firestore.rules`.
+2. **Seeding Firestore**:
+   - To seed or re-seed botanical data, run:
      ```bash
-     cd web3 && node scripts/seed-supabase-plants.js
+     cd web3 && npm run seed:db
      ```
-   - This seeds all 237 curated species directly into Supabase.
+   - This loads all 237 curated species directly into Firestore.
 3. **Hybrid Caching (`nj-data.ts`)**:
-   - The data loader supports seamless fallback: reads from Supabase when connected, and gracefully falls back to local JSON for offline and build environments.
+   - The data loader supports seamless fallback: reads from Firestore when connected, and gracefully falls back to local JSON for offline and build environments.
 
 ---
 *Documentation compiled on November 3, 2026 for NativeYard (`web3`).*

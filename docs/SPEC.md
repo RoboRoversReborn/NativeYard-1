@@ -14,7 +14,7 @@
 | **Capture** | User uploads **one whole-yard photo**. The app **auto-detects and crops each plant** (Gemini free tier), identifies each crop, and keeps positions for a **yard layout map** in the report |
 | **Pricing** | **Free** for MVP; premium features later (see §17) |
 | **Sign-in** | **Google (Gmail) sign-in** only |
-| **Hosting** | **Free tiers for student demo**: Vercel (app) + Supabase (DB, auth, storage) (see §18) |
+| **Hosting** | **Free tiers for student demo**: Firebase (App Hosting, Auth, Firestore, Cloud Storage) (see §18) |
 
 ---
 
@@ -230,10 +230,10 @@ flowchart TB
         CL["Classification engine"]
         RG["Report builder + layout map"]
     end
-    subgraph Supabase["Supabase - free plan"]
+    subgraph Firebase["Firebase Platform"]
         AUTH["Auth - Google sign-in"]
-        DB[("Postgres + PostGIS")]
-        OBJ[("Storage - photos + crops")]
+        DB[("Cloud Firestore")]
+        OBJ[("Cloud Storage - photos + crops")]
     end
     subgraph External
         GEM["Gemini API free tier - detection"]
@@ -262,17 +262,17 @@ Two swappable interfaces:
 - **Plant ID adapter** `identify(images, organs) → candidates[]`: Pl@ntNet now; later the custom model.
 
 ### 7.1 Stack (MVP, all free tier)
-- **Frontend:** Next.js (App Router, React), responsive mobile-first CSS, installable PWA, camera capture via `<input type="file" accept="image/*" capture>`.
-- **Backend:** Next.js API routes on Vercel. No separate server or job queue: each crop is identified in parallel within the request.
-- **DB:** Supabase Postgres + PostGIS (NJ ecoregion polygons, plant knowledge base).
-- **Storage:** Supabase Storage. Keep the **full-resolution original** (up to ~4000 px, needed for sharp crops), a ~1280 px display copy, and the generated crops.
-- **Auth:** Supabase Auth with the **Google** provider (Gmail sign-in).
-- **PDF:** generated in the browser (print-to-PDF stylesheet or `@react-pdf/renderer`). This avoids heavy headless browsers on free serverless.
-- **Report narrative:** template-based in the MVP; optional Gemini free tier for a personalized summary.
-- **Hosting:** see §18.
+- **Frontend:** Next.js (App Router, React 19), responsive mobile-first CSS, camera capture via `<input type="file" accept="image/*" capture>` and desktop live webcam.
+- **Backend:** Next.js API routes on Firebase App Hosting / Cloud Run.
+- **DB:** Firebase Cloud Firestore (plant knowledge base, properties, yard areas, scan histories).
+- **Storage:** Firebase Cloud Storage with client-side WebP compression (max 1280px).
+- **Auth:** Firebase Auth with Google One-Click Provider (Gmail sign-in).
+- **PDF:** generated in the browser via `jsPDF` and `html2canvas`.
+- **Report narrative:** template-based in the MVP; Gemini 2.5 Flash for personalized summaries.
+- **Hosting:** Firebase App Hosting & Hosting (see §18).
 
 ### 7.2 Identification Pipeline
-1. **Upload** the whole-yard photo (full resolution; EXIF GPS stripped) → Supabase Storage.
+1. **Upload** the whole-yard photo (client-compressed WebP) → Firebase Cloud Storage.
 2. **Detect:** send a downscaled copy (~1600 px) to Gemini with a structured prompt: *"Return JSON of every distinct plant: box_2d [ymin, xmin, ymax, xmax] normalized 0–1000, type, best-guess name."* Lawn and hardscape come back as areas.
 3. **Auto-crop:** map the normalized boxes back to the **full-resolution** image, add ~10% padding, and crop server-side (e.g., `sharp`). Skip crops below the minimum size and mark them "Needs a closer look".
 4. **Identify:** send each crop to Pl@ntNet `/v2/identify` in **parallel** (organ = `auto`, or `leaf` / `flower` if Gemini reports it). Cache by image hash.
@@ -378,7 +378,7 @@ ActionItem      (id, report_id, title, phase, due_season, completed_at)
 
 | Phase | Scope |
 |---|---|
-| **MVP (v0.1): NJ demo** | Google sign-in, NJ ZIP onboarding, photo upload + crop, Pl@ntNet ID with confirm / correct, native / non-native / invasive / keystone classification (curated NJ set), yard summary + Native Score, basic report (removal + NJ substitutes + keystone list), browser PDF export. Hosted free on Vercel + Supabase |
+| **MVP (v0.1): NJ demo** | Google sign-in, NJ ZIP onboarding, photo upload + crop, Pl@ntNet ID with confirm / correct, native / non-native / invasive / keystone classification (curated NJ set), yard summary + Native Score, basic report (removal + NJ substitutes + keystone list), browser PDF export. Hosted free on Firebase (App Hosting, Auth, Firestore, Cloud Storage) |
 | **v0.2: NJ complete** | Native Score history, action checklist, pollinator bloom calendar, county-level resources (Rutgers Extension, NPSNJ chapters), expand curated set to 500+ species |
 | **v0.3: Community data** | "Contribute photos" flow, neighborhood plant map, expert verification queue (foundation for the custom model) |
 | **v0.4: Custom model** | Train and deploy the first custom NJ yard-plant model; A/B test against Pl@ntNet |
@@ -396,7 +396,7 @@ ActionItem      (id, report_id, title, phase, due_season, completed_at)
 | LLM hallucinating plant facts | Facts come from the curated KB only; LLM writes narrative from retrieved data |
 | Data licensing restrictions | Early outreach to NWF, Audubon, Wildflower Center; fall back to public-domain USDA data |
 | Pl@ntNet free quota (~500/day) exceeded during a demo | Cache by image hash, per-user daily limit (e.g., 20 IDs), friendly "try again tomorrow" message |
-| Free-tier limits (Supabase pauses idle projects, storage caps) | Open the app before demos; compress images; auto-delete anonymous scans after 7 days |
+| Free-tier limits (storage caps, Cloud Run quotas) | Open the app before demos; WebP client-side canvas compression; auto-delete anonymous scans after 7 days |
 | Pl@ntNet free tier is non-commercial | Move to the paid Pl@ntNet plan or the custom model before launching paid features |
 | Poor-quality community training images | Expert / multi-user verification before images enter the training set |
 | Winter / dormant plants are hard to ID | Suggest rescanning in growing season; allow bark / twig photos |
@@ -438,7 +438,7 @@ flowchart LR
 
 ### 16.2 Approach
 - **Model type:** an image **vision model** (not a text LLM). Options:
-  - *Phase A (cheap, fast):* **embedding + nearest-neighbor** (e.g., CLIP / DINOv2 image embeddings stored in **pgvector** on Supabase). New plants can be added just by uploading example images, no retraining needed. Good fit for "user trains by providing images".
+  - *Phase A (cheap, fast):* **embedding + nearest-neighbor** (e.g., CLIP / DINOv2 image embeddings stored via Firestore Vector Search / Vertex AI). New plants can be added just by uploading example images, no retraining needed. Good fit for "user trains by providing images".
   - *Phase B (accurate):* **fine-tuned classifier** (e.g., EfficientNet / ViT) trained on the verified dataset. Train on Google Colab or Kaggle (free GPUs); serve via Hugging Face Inference or a small GPU host.
   - *Optional:* multimodal LLM (e.g., Gemini) for explanations and multi-plant detection.
 - **Hybrid inference:** custom model first. If confidence is low, fall back to Pl@ntNet.
@@ -476,32 +476,22 @@ The MVP is **free**. Candidate premium features for later:
 
 | Layer | Service | Free tier highlights* | Why |
 |---|---|---|---|
-| **Web app + API** | **Vercel (Hobby)** | Free for personal / non-commercial use, automatic HTTPS, GitHub auto-deploys, preview URLs | Made by the creators of Next.js; zero config |
-| **DB + Auth + Storage** | **Supabase (Free)** | Postgres (~500 MB) with **PostGIS** + **pgvector**, Auth with **Google provider**, ~1 GB file storage | One service covers DB, Google sign-in, and photos |
+| **Web app + API** | **Firebase App Hosting / Cloud Run** | Next.js 16 SSR & API routes, automatic HTTPS, GitHub auto-deploys | Native Google Cloud integration; zero config |
+| **Custom Domain & CDN** | **Firebase Hosting** | Free SSL, global fast CDN rewrites (`https://njnativeyard.web.app`) | Fast edge distribution with custom domain options |
+| **DB + Auth + Storage** | **Firebase (Spark Plan)** | Cloud Firestore (1 GiB, 50k reads/day), Firebase Auth (Google sign-in), Cloud Storage (5 GB free) | Single unified Google ecosystem for auth, data, and photos |
 | **Plant ID** | **Pl@ntNet API** | ~500 IDs/day, non-commercial | Free, botanically trustworthy |
 | **Plant detection** | **Google Gemini API** free tier (API key from Google AI Studio) | Rate-limited free usage | Finds and boxes each plant in the whole-yard photo; also report narrative |
-| **Code + CI** | **GitHub** (free) | Repos, Actions | Vercel deploys on each push |
-| **Domain** | `*.vercel.app` subdomain (free) | n/a | Custom domain optional; GitHub Student Pack includes a free domain offer |
+| **Code + CI** | **GitHub** (free) | Repos, Actions | Firebase App Hosting deploys on each branch push |
 
 \*Free-tier limits change; check the current pricing pages before relying on them.
 
 **Student perks:** the **GitHub Student Developer Pack** includes free credits and offers (e.g., a free domain, cloud credits, and other services) useful when the demo outgrows free tiers.
 
-### 18.2 Alternatives
-
-| Option | Pros | Cons |
-|---|---|---|
-| **Firebase (Spark plan)** + Firebase Hosting | Google sign-in is built in; Firestore and Storage | No PostGIS / SQL; Cloud Functions need the paid Blaze plan |
-| **Netlify** (free) | Similar to Vercel; supports Next.js | Slightly less seamless Next.js support |
-| **Render** (free web service) | Can host a Python backend (useful for the custom model later) | Free services sleep after inactivity (slow first load) |
-| **Hugging Face Spaces** (free CPU) | Host the future custom model demo | CPU-only on free tier |
-| **Cloudflare Pages + Workers** | Generous free tier, fast | Next.js support requires an adapter; more setup |
-
-### 18.3 Free-Tier Gotchas
-- **Supabase pauses free projects after about 1 week of inactivity.** Open the dashboard / app before a demo, or set up a weekly ping.
-- **Vercel Hobby** is non-commercial only, and serverless functions have execution time limits. Keep each API call short (parallel Pl@ntNet calls, no headless-browser PDF).
-- **Google OAuth:** while the OAuth consent screen is in "Testing" mode, only listed test users can sign in. Add demo testers, or publish the app (basic scopes like email / profile don't need Google verification).
-- Keep API keys (Pl@ntNet, Gemini) **server-side only**, in Vercel environment variables.
+### 18.2 Free-Tier Gotchas
+- **Client-Side Image Compression:** Use `compressImageToOptimizedBlob()` (max 1280px, WebP ~100KB) to ensure 40,000+ photos fit comfortably inside the 5 GB Spark free tier.
+- **Google OAuth:** Configure authorized domains in Firebase Authentication settings (e.g., `njnativeyard.web.app`, `localhost`).
+- **Cloud Run Ingress:** For Firebase Hosting rewrites to App Hosting services, ensure `roles/run.invoker` is granted to `allUsers`.
+- Keep API keys (Pl@ntNet, Gemini) **server-side only** in `.env.local` or Cloud Run environment variables.
 
 ---
 

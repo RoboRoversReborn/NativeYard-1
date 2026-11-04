@@ -2,37 +2,38 @@
 
 ## 1. Executive Summary
 
-**NativeYard V3** (`web3`) is a unified, next-generation ecological yard audit and landscaping platform calibrated specifically for New Jersey homeowners and restoration practitioners. It merges the modern editorial UI, rich ecological storytelling, and comprehensive botanical classifications from `web2` with the production-tested Supabase property management, multi-tier vision analysis, hardware camera integration, and a newly introduced **Interactive Bounding Box Canvas Engine**.
+**NativeYard V3** (`web3`) is a unified, next-generation ecological yard audit and landscaping platform calibrated specifically for New Jersey homeowners and restoration practitioners. It merges the modern editorial UI, rich ecological storytelling, and comprehensive botanical classifications from `web2` with production-tested Firebase property management, multi-tier vision analysis, hardware camera integration, and a newly introduced **Interactive Bounding Box Canvas Engine**.
 
 ### Core Value Proposition
 - **Nature-Journal Editorial Layout**: Magazine-grade visual typography (Fraunces serif + DM Sans), interactive ecological dial, and educational narratives ("How it works in three acts", "Why native, why now", "Plant verdicts").
 - **Botanical Precision**: 5-tier classification (`NATIVE_KEYSTONE`, `NATIVE`, `NON_NATIVE_BENIGN`, `INVASIVE_REGULATED`, `INVASIVE_WATCHLIST`) based on Rutgers NJAES, NPSNJ, and Dr. Doug Tallamy's research.
 - **Interactive Bounding Box Canvas**: Full visual control over yard detections — click to inspect, delete false positives, redraw boundaries, draw new custom regions, and re-identify targeted foliage crops on the fly.
-- **Full Property & Yard Management**: Authenticated homeowner property profiles (multiple addresses, front/back/side yard areas, historical scan timelines, Supabase Storage persistence, and instant reload of past audits).
-- **Dual Camera & Compression**: Live webcam viewfinder with device switching + native mobile rear shutter, paired with client-side canvas compression to avoid mobile timeout and 413 payload limits.
+- **Full Property & Yard Management**: Authenticated homeowner property profiles (multiple addresses, front/back/side yard areas, historical scan timelines, Firebase Cloud Storage persistence, and instant reload of past audits).
+- **Dual Camera & Compression**: Live webcam viewfinder with device switching + native mobile rear shutter, paired with client-side canvas compression (optimized WebP/JPEG, max 1280px) to maximize the Firebase Spark free tier for 40,000+ scans.
 
 ---
 
 ## 2. Architecture & File Structure
 
-The new application is isolated inside `/Users/niravgadhia/LandscapingApp/web3` to guarantee zero regressions to `/web` or `/web2`.
+The application is isolated inside `/Users/niravgadhia/LandscapingApp/web3`.
 
 ```
 /Users/niravgadhia/LandscapingApp/web3/
 ├── app/
 │   ├── api/
 │   │   ├── analyze/
-│   │   │   └── route.ts             # Global yard photo analysis (Gemini 3.5 Flash + Pl@ntNet)
-│   │   ├── reidentify-box/
-│   │   │   └── route.ts             # Targeted crop re-identification for user-drawn boxes
-│   │   └── auth/
-│   │       └── callback/route.ts    # Supabase OAuth redirect handler
+│   │   │   └── route.ts             # Global yard photo analysis (Gemini 2.5 Flash + Pl@ntNet)
+│   │   └── reidentify-box/
+│   │       └── route.ts             # Targeted crop re-identification for user-drawn boxes
+│   ├── admin/
+│   │   └── plants/
+│   │       └── page.tsx             # Curator admin portal for browsing/editing 237 NJ plants
 │   ├── globals.css                  # Tailwind CSS v4 design system & custom animations
-│   ├── layout.tsx                   # App shell, fonts (Fraunces & DM Sans), Supabase session provider
+│   ├── layout.tsx                   # App shell, fonts (Fraunces & DM Sans), Firebase Auth provider
 │   └── page.tsx                     # Main application entry point orchestrating the state machine
 ├── components/
 │   ├── auth/
-│   │   ├── AuthModal.tsx            # Google / Magic Link login modal
+│   │   ├── AuthModal.tsx            # Google One-Click Auth modal
 │   │   └── UserDropdown.tsx         # User avatar and account settings dropdown
 │   ├── camera/
 │   │   └── CameraModal.tsx          # Live webcam viewfinder with camera flip & countdown
@@ -55,85 +56,84 @@ The new application is isolated inside `/Users/niravgadhia/LandscapingApp/web3` 
 ├── data/
 │   └── nj-flora.v1.json             # Canonical NJ plant catalog (lepidoptera hosts, moisture, deer)
 ├── lib/
-│   ├── camera.ts                    # Device detection, orientation check, client compressImageFile
+│   ├── camera.ts                    # Device detection, EXIF orientation, compressImageToOptimizedBlob
 │   ├── plants.ts                    # NJ plant querying, ecoregion matching, swap recommendations
 │   ├── scoring.ts                   # Biodiversity score algorithm & ecological grade calculator
 │   ├── types.ts                     # Strict TypeScript interfaces (Property, YardArea, Audit, Detection)
 │   ├── vision.ts                    # Gemini Vision prompt runner & crop extraction
-│   └── supabase/
-│       ├── client.ts                # Browser Supabase client
-│       ├── server.ts                # Server component Supabase client
-│       └── properties.ts            # CRUD helpers for properties, yard_areas, and yard_scans
+│   └── firebase/
+│       ├── client.ts                # Browser Firebase client (Auth, Firestore, Storage)
+│       ├── admin.ts                 # Server Firebase Admin SDK initialized with project credentials
+│       ├── properties.ts            # CRUD helpers for properties, yard_areas, and yard_scans
+│       └── plants.ts                # Firestore plants collection operations
 ├── public/
 │   ├── samples/                     # Curated sample yards (Front Yard, Back Bed, Woodland Edge)
 │   └── images/                      # Reference badges, icons, and textures
-├── package.json                     # Next.js 16, React 19, Tailwind v4, Lucide React, Sharp
+├── scripts/
+│   ├── seed-firebase-plants.mjs     # Batch seeder for 237 NJ plants into Firestore
+│   └── setup-firebase.mjs           # Firebase setup verification
+├── firebase.json                    # Firebase App Hosting & Hosting rewrites config
+├── firestore.rules                  # Firestore security rules
+├── storage.rules                    # Cloud Storage security rules
+├── apphosting.yaml                  # Firebase App Hosting compute config
+├── package.json                     # Next.js 16, React 19, Tailwind v4, Firebase 13, Sharp
 ├── tsconfig.json                    # Strict TypeScript configuration
-├── SPECIFICATION.md                 # This document
-└── PHASED_PLAN.md                   # Execution milestones and testing roadmap
+└── SPECIFICATION.md                 # This document
 ```
 
 ---
 
-## 3. Data Models & TypeScript Contracts
+## 3. Data Models & Schemas
 
-### 3.1 Plant & Botanical Classification
+### 3.1 Botanical Plant Entity
 ```typescript
-export type NjPlantStatus =
-  | "NATIVE_KEYSTONE"    // High ecological value (e.g., Quercus alba supporting 500+ caterpillars)
-  | "NATIVE"             // Indigenous to NJ physiographic provinces
-  | "NON_NATIVE_BENIGN"  // Non-indigenous but non-invasive ornamental (e.g., Hydrangea)
-  | "INVASIVE_REGULATED" // Banned/restricted by NJ state environmental laws (e.g., Callery Pear)
-  | "INVASIVE_WATCHLIST";// High ecological threat to NJ woodlands (e.g., Japanese Barberry)
-
-export interface Plant {
+export interface NJPlant {
   id: string;
   commonName: string;
   scientificName: string;
-  status: "keystone" | "native" | "non-native" | "invasive";
-  njStatus: NjPlantStatus;
-  type: "Tree" | "Shrub" | "Perennial" | "Groundcover" | "Vine" | "Grass" | "Fern";
-  sun: string;
-  moisture: string;
-  bloom: string;
-  height: string;
-  description: string;
-  lepidoptera?: number;               // Number of caterpillar species hosted
-  specialistBeeSupport?: boolean;     // Supports pollen-specialist native bees
-  deerResistance?: "HIGH" | "MODERATE" | "LOW";
-  swapIds?: string[];                 // Recommended native replacement plant IDs
-  removal?: {
-    method: string;
-    timing: string;
-    safety: string;
-    disposal: string;
+  family?: string;
+  status: "NATIVE_KEYSTONE" | "NATIVE" | "NON_NATIVE_BENIGN" | "INVASIVE_REGULATED" | "INVASIVE_WATCHLIST";
+  plantType: "Tree" | "Shrub" | "Perennial" | "Fern" | "Grass" | "Vine";
+  lepidopteraHostsSupported?: number;
+  sunNeeds?: "Full Sun" | "Partial Sun" | "Full Shade" | "Adaptable";
+  soilMoisture?: "Dry" | "Moist" | "Wet" | "Adaptable";
+  deerResistance?: "High" | "Moderate" | "Low";
+  invasiveProfile?: {
+    harmSummary: string;
+    removalMethods: string[];
+    nativeSubstitutes: string[];
   };
+  nativeBenefits?: {
+    ecologicalSummary: string;
+    keystoneNotes?: string;
+  };
+  samplePhotoUrl?: string;
 }
 ```
 
-### 3.2 Bounding Box & Detection Model
+### 3.2 Yard Detection Entity
 ```typescript
-export interface BoundingBox {
-  x: number; // Percentage from left (0 - 100)
-  y: number; // Percentage from top (0 - 100)
-  w: number; // Percentage width (0 - 100)
-  h: number; // Percentage height (0 - 100)
-}
-
 export interface Detection {
   id: string;
   plantId: string;
+  commonName: string;
+  scientificName: string;
+  status: PlantStatus;
   confidence: number;
-  box: BoundingBox;
-  areaSqFt?: number;
-  needsReview?: boolean;
+  box: {
+    x: number; // 0-100 percentage
+    y: number; // 0-100 percentage
+    w: number; // 0-100 percentage
+    h: number; // 0-100 percentage
+  };
+  reasoning?: string;
   plantPart?: "leaf" | "flower" | "fruit" | "bark" | "habit";
   source: "gemini" | "plantnet" | "manual_crop";
   isUserDrawn?: boolean;
 }
 ```
 
-### 3.3 Supabase Property & Scan Schema
+### 3.3 Firebase Property & Scan Schema
 ```typescript
 export interface Property {
   id: string;
@@ -205,13 +205,7 @@ The yard photo is rendered inside a responsive canvas container with coordinates
 5. **Targeted Re-identification API (`POST /api/reidentify-box`)**:
    - Input: `{ imageBase64, box: { x, y, w, h }, zip, targetDetectionId? }`
    - Execution:
-     1. Uses `sharp` to extract the bounding box slice:
-        ```typescript
-        const left = Math.round((box.x / 100) * fullWidth);
-        const top = Math.round((box.y / 100) * fullHeight);
-        const width = Math.round((box.w / 100) * fullWidth);
-        const height = Math.round((box.h / 100) * fullHeight);
-        ```
+     1. Uses `sharp` to extract the bounding box slice.
      2. Calls Gemini Vision model with targeted prompt focused strictly on the isolated crop.
      3. Cross-references the response with `nj-flora.v1.json`.
      4. Returns the matched plant ID, confidence, and verified metadata.
@@ -219,7 +213,7 @@ The yard photo is rendered inside a responsive canvas container with coordinates
 
 ---
 
-### 4.2 Property Management & Yard Area Persistence
+## 4.2 Property Management & Yard Area Persistence
 1. **Property Bar**:
    - A sticky toolbar beneath the main header displaying:
      - Active Property selector dropdown (e.g., `🏡 42 Elm Street, Ridgewood NJ`).
@@ -227,10 +221,11 @@ The yard photo is rendered inside a responsive canvas container with coordinates
      - **"Save Audit to Yard Area"** action button.
 2. **Saving Scans**:
    - When the user clicks "Save Audit", the system:
-     1. Uploads the current image blob to Supabase Storage bucket `yard-photos/${userId}/${scanId}.jpg`.
-     2. Obtains the public URL.
-     3. Inserts a record into `yard_scans` with all plant detections, bounding boxes, score, and timestamp.
-     4. Displays a success toast notification.
+     1. Optimizes the photo using client-side canvas compression (`compressImageToOptimizedBlob`, max 1280px, WebP/JPEG, ~100KB).
+     2. Uploads the image blob to Firebase Cloud Storage at `yard-photos/${userId}/${scanId}.webp`.
+     3. Obtains the download URL.
+     4. Inserts a record into Firestore `properties/${propertyId}/yard_areas/${areaId}/scans` with all detections, bounding boxes, score, and timestamp.
+     5. Displays a success toast notification.
 3. **Restoring Past Scans**:
    - In the Property Manager modal, users can view past scans by date.
    - Clicking **"Load Scan"** reconstructs the full visualizer:
@@ -240,7 +235,7 @@ The yard photo is rendered inside a responsive canvas container with coordinates
 
 ---
 
-### 4.3 Hardware Camera & Client Preprocessing
+## 4.3 Hardware Camera & Client Preprocessing
 1. **Device Detection**:
    - Uses `isMobileOrTablet()` to determine hardware environment.
    - On mobile devices, triggers `<input type="file" accept="image/*" capture="environment" />` for maximum resolution and autofocus.
@@ -250,29 +245,11 @@ The yard photo is rendered inside a responsive canvas container with coordinates
    - Flip camera button.
    - Shutter button with 3-second countdown and flash animation.
    - Preview confirmation modal with "Retake" and "Analyze Photo" options.
-3. **Client-Side Image Optimization (`compressImageFile`)**:
-   - Auto-orients image based on EXIF tags.
-   - Scales long edge to max 1600px.
-   - Converts HEIC/PNG to 85% quality JPEG.
-   - Keeps payload size around 300KB–600KB, ensuring sub-second upload times.
-
----
-
-### 4.4 Editorial Storytelling & Ecological Action Plan
-1. **Landing Page Educational Modules**:
-   - **"How it works in three acts"**:
-     - *Act I: Photograph the Living Space* (Wide-angle shot of the bed).
-     - *Act II: Read the Ecology* (Gemini Vision extracts species & caterpillar counts).
-     - *Act III: Execute the Plan* (Targeted removal guide & native replacements).
-   - **"Plant verdicts — Not all green is good"**:
-     - Visual badge guide explaining the differences between Keystone Natives, Benign Non-natives, and Regulated Invasives.
-   - **"Why native, why now"**:
-     - Ecological statistics: 40 million acres of lawn in the US; 96% of terrestrial birds feed chicks exclusively on native caterpillars; Oak trees hosting 500+ species vs. Bradford Pear hosting 1.
-2. **Actionable Report View**:
-   - Printable 1-page yard conservation audit.
-   - Invasive eradication protocols (cut-stump, herbicide safety, disposal timing).
-   - Recommended native swaps matched to existing sun/soil conditions.
-   - Seasonal planting calendar for New Jersey Zones 6a–7b.
+3. **Client-Side Image Optimization (`compressImageToOptimizedBlob`)**:
+   - Auto-orients image based on EXIF orientation tags.
+   - Scales long edge to max 1280px.
+   - Compresses to WebP (fallback to 80% JPEG).
+   - Reduces 8MB smartphone photos down to ~90KB-130KB, maximizing the 5 GB Spark free tier for ~40,000+ scans.
 
 ---
 
@@ -283,12 +260,16 @@ The application requires the following environment variables (stored in `.env.lo
 ```bash
 # Google Gemini Vision
 GEMINI_API_KEY=AIzaSy...
-GEMINI_VISION_MODEL=gemini-3.5-flash
+GEMINI_MODEL=gemini-2.5-flash
 
 # Botanical Identification Fallback (Optional)
-PLANTNET_API_KEY=2b10...
+PLANTNET_API_KEY=your_key_here
 
-# Supabase Auth, Database & Storage
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-app.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-firebase-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-app.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1234567890
+NEXT_PUBLIC_FIREBASE_APP_ID=1:1234567890:web:abcdef123456
 ```

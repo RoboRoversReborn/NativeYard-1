@@ -1,6 +1,6 @@
 # NativeYard V3 — Phased Implementation Plan
 
-This document establishes the step-by-step phased execution plan to construct **NativeYard V3** inside the `/Users/niravgadhia/LandscapingApp/web3` folder, combining the UI & ecological classifications of `web2` with the camera, vision engine, and Supabase property management of `web`, plus the new **Interactive Bounding Box Canvas Engine**.
+This document establishes the step-by-step phased execution plan to construct **NativeYard V3** inside the `/Users/niravgadhia/LandscapingApp/web3` folder, combining the UI & ecological classifications of `web2` with the camera, vision engine, and Firebase property management of `web`, plus the new **Interactive Bounding Box Canvas Engine**.
 
 ---
 
@@ -12,7 +12,7 @@ This document establishes the step-by-step phased execution plan to construct **
 ├────────────────────────────────────────────────────────────────────────────────────────────────────┤
 │ Phase 2: Data Models & NJ Flora Catalog  (Types, nj-flora snapshot, ecoregion matcher)             │
 ├────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ Phase 3: Supabase Properties & Scans     (Auth, PropertyBar, Yard Areas, Save/Restore Scan)        │
+│ Phase 3: Firebase Properties & Scans     (Google Auth, PropertyBar, Yard Areas, Cloud Storage)    │
 ├────────────────────────────────────────────────────────────────────────────────────────────────────┤
 │ Phase 4: Camera System & Preprocessing   (Webcam viewfinder, Mobile shutter, compressImageFile)    │
 ├────────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -35,11 +35,11 @@ This document establishes the step-by-step phased execution plan to construct **
 ### Phase 1: Foundation & Scaffold Setup
 - **Goal**: Initialize the Next.js 16 / React 19 project structure in `web3/` with Tailwind CSS v4, TypeScript, Lucide React icons, and Sharp image processing.
 - **Tasks**:
-  1. Create `package.json` with Next.js 16, React 19, Lucide React, Sharp, and `@supabase/supabase-js`.
+  1. Create `package.json` with Next.js 16, React 19, Lucide React, Sharp, and `firebase`.
   2. Configure `tsconfig.json` with path aliases (`@/*` pointing to `./*`).
   3. Set up `app/layout.tsx` with Google Fonts (`Fraunces` and `DM Sans`).
   4. Set up `app/globals.css` with the curated cream linen and deep forest green color tokens.
-  5. Symlink or copy `.env.local` to enable Gemini and Supabase API access.
+  5. Symlink or copy `.env.local` to enable Gemini and Firebase API access.
 - **Deliverables**: Working Next.js development server running on an independent port.
 
 ---
@@ -59,15 +59,15 @@ This document establishes the step-by-step phased execution plan to construct **
 
 ---
 
-### Phase 3: Supabase Property Management & Yard Persistence
-- **Goal**: Port and modernize the property management system from `web/`.
+### Phase 3: Firebase Property Management & Yard Persistence
+- **Goal**: Implement multi-property management, yard areas, and scan persistence using Firebase.
 - **Tasks**:
-  1. Create `lib/supabase/client.ts` and `lib/supabase/server.ts`.
-  2. Implement `lib/supabase/properties.ts`:
-     - `getPropertiesWithAreas()`: Retrieve user properties, yard areas, and scan history.
+  1. Create `lib/firebase/client.ts` and `lib/firebase/admin.ts`.
+  2. Implement `lib/firebase/properties.ts`:
+     - `getPropertiesWithAreas()`: Retrieve user properties, yard areas, and scan history from Firestore.
      - `createProperty()`: Add address and auto-generate default Front/Back yard areas.
      - `createYardArea()`: Add custom area (e.g. Side Yard, Shade Bed, Patio).
-     - `saveYardScan()`: Upload photo to Supabase Storage and insert audit record.
+     - `saveYardScan()`: Upload compressed WebP photo to Firebase Storage and insert scan document.
   3. Build UI components:
      - `components/property/PropertyBar.tsx`: Sticky bar with property selector, yard area tabs, and "Save Scan" button.
      - `components/property/PropertyManagerModal.tsx`: Manage addresses and inspect past scan dates.
@@ -162,6 +162,6 @@ This document establishes the step-by-step phased execution plan to construct **
   2. Test mobile camera capture and client compression.
   3. Test drawing a new box over an un-detected plant and verifying re-identification.
   4. Test deleting an invasive plant box and confirming score increase.
-  5. Test saving scan to a Supabase property yard area and reloading it back.
+  5. Test saving scan to a Firebase property yard area and reloading it back.
   6. Verify zero modifications to existing `/web` and `/web2` codebases.
 - **Deliverables**: Fully verified, independently running NativeYard V3 application.

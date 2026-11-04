@@ -17,13 +17,24 @@ node_modules/
 .env.production.local
 *.pem
 *.key
+service-account*.json
+*-service-account.json
+*serviceAccount*.json
+
+# Firebase
+.firebase/
+.firebaserc.local
+*-debug.log
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+pubsub-debug.log*
 
 # Next.js & build outputs
 .next/
 out/
 build/
 dist/
-web2/
 
 # Vercel
 .vercel
@@ -42,7 +53,6 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
-next-env.d.ts
 
 # Operating System Files
 .DS_Store
