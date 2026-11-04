@@ -12,6 +12,15 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "nativeyard-web",
+          "region": "us-east4"
+        }
+      }
     ]
   }
 }
