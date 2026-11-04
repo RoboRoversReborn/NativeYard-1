@@ -9,7 +9,11 @@ service cloud.firestore {
 
     // Helper: is curator/admin
     function isAdmin() {
-      return isAuthenticated() && exists(/databases/$(database)/documents/admin_users/$(request.auth.uid));
+      return isAuthenticated() && (
+        request.auth.token.email == "niravgadhia@gmail.com" ||
+        exists(/databases/$(database)/documents/admin_users/$(request.auth.uid)) ||
+        exists(/databases/$(database)/documents/admin_users/$(request.auth.token.email))
+      );
     }
 
     // Flora catalog: anyone can read, only admin can write
@@ -18,7 +22,7 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Admin user directory
+    // Admin user directory: readable by authenticated users, writable by admins
     match /admin_users/{userId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
