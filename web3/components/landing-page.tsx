@@ -185,8 +185,8 @@ export function LandingPage({
                   type="button"
                   onClick={() => setLaunchpadMode("upload")}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${launchpadMode === "upload"
-                      ? "bg-[#163f2c] text-[#d7f27a] shadow-xs"
-                      : "bg-transparent text-[#5d6b60] hover:bg-[#e5e0d1] hover:text-[#163f2c]"
+                    ? "bg-[#163f2c] text-[#d7f27a] shadow-xs"
+                    : "bg-transparent text-[#5d6b60] hover:bg-[#e5e0d1] hover:text-[#163f2c]"
                     }`}
                 >
                   <UploadCloud className="h-4 w-4" />
@@ -197,8 +197,8 @@ export function LandingPage({
                   type="button"
                   onClick={() => setLaunchpadMode("sample")}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${launchpadMode === "sample"
-                      ? "bg-[#163f2c] text-[#d7f27a] shadow-xs"
-                      : "bg-transparent text-[#5d6b60] hover:bg-[#e5e0d1] hover:text-[#163f2c]"
+                    ? "bg-[#163f2c] text-[#d7f27a] shadow-xs"
+                    : "bg-transparent text-[#5d6b60] hover:bg-[#e5e0d1] hover:text-[#163f2c]"
                     }`}
                 >
                   <Sparkles className="h-4 w-4" />
@@ -458,8 +458,8 @@ export function LandingPage({
                           type="button"
                           onClick={() => onSelectSample?.(key)}
                           className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2.5 rounded-xl text-xs font-bold transition ${isSelected
-                              ? "bg-[#163f2c] text-[#d7f27a] shadow-sm ring-1 ring-[#163f2c]"
-                              : "bg-[#ede7d5]/60 text-[#3a4d3f] hover:bg-[#ede7d5] border border-[#d8d3bf]/60"
+                            ? "bg-[#163f2c] text-[#d7f27a] shadow-sm ring-1 ring-[#163f2c]"
+                            : "bg-[#ede7d5]/60 text-[#3a4d3f] hover:bg-[#ede7d5] border border-[#d8d3bf]/60"
                             }`}
                         >
                           <span>{key === "front-yard" ? "🏡 Front Yard" : key === "back-yard" ? "🌸 Backyard" : "🌲 Side Yard"}</span>
@@ -722,11 +722,11 @@ export function LandingPage({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#143424] text-xs font-black text-[#d7f27a] shadow-xs">
-                            34
+                            37
                           </span>
                           <div>
                             <p className="text-[11px] font-bold text-[#143424] leading-tight">
-                              Score 34 · Eco-transitional
+                              Score 37 · Eco-transitional
                             </p>
                             <p className="text-[9px] font-semibold text-[#7a806e]">
                               2 Native · 2 Invasive · 2 Non-native

@@ -21,7 +21,7 @@ export const SAMPLE_YARDS: Record<SampleYardKey, SampleYardConfig> = {
     tagline: "Classic foundation planting with invasive shrubs & keystone oak",
     filename: "/samples/front-yard.jpg",
     description: "Typical New Jersey suburban front foundation with a mix of invasive Japanese Barberry, Burning Bush, and an overarching keystone Oak.",
-    initialScore: 34,
+    initialScore: 37,
     initialScoreLabel: "Eco-transitional",
     detections: [
       {
@@ -87,7 +87,7 @@ export const SAMPLE_YARDS: Record<SampleYardKey, SampleYardConfig> = {
     tagline: "Vibrant flower border featuring keystone native perennials & ivy",
     filename: "/samples/back-yard.jpg",
     description: "Lush sunny border along a fence line featuring milkweed, goldenrod, and highbush blueberry alongside invasive English Ivy.",
-    initialScore: 52,
+    initialScore: 59,
     initialScoreLabel: "Eco-transitional",
     detections: [
       {
