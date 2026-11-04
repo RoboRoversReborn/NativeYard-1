@@ -184,11 +184,10 @@ export function LandingPage({
                 <button
                   type="button"
                   onClick={() => setLaunchpadMode("upload")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                    launchpadMode === "upload"
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${launchpadMode === "upload"
                       ? "bg-[#163f2c] text-[#d7f27a] shadow-xs"
                       : "bg-transparent text-[#5d6b60] hover:bg-[#e5e0d1] hover:text-[#163f2c]"
-                  }`}
+                    }`}
                 >
                   <UploadCloud className="h-4 w-4" />
                   <span>Upload Your Yard Photo</span>
@@ -197,11 +196,10 @@ export function LandingPage({
                 <button
                   type="button"
                   onClick={() => setLaunchpadMode("sample")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                    launchpadMode === "sample"
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold transition-all ${launchpadMode === "sample"
                       ? "bg-[#163f2c] text-[#d7f27a] shadow-xs"
                       : "bg-transparent text-[#5d6b60] hover:bg-[#e5e0d1] hover:text-[#163f2c]"
-                  }`}
+                    }`}
                 >
                   <Sparkles className="h-4 w-4" />
                   <span>Try 3 Live NJ Sample Yards</span>
@@ -270,9 +268,8 @@ export function LandingPage({
 
                   {/* Dropzone Container */}
                   <div
-                    className={`dropzone ${dragging ? "is-dragging" : ""} ${
-                      photo ? "has-photo" : ""
-                    }`}
+                    className={`dropzone ${dragging ? "is-dragging" : ""} ${photo ? "has-photo" : ""
+                      }`}
                     onDragOver={(event) => {
                       event.preventDefault();
                       setDragging(true);
@@ -460,17 +457,15 @@ export function LandingPage({
                           key={key}
                           type="button"
                           onClick={() => onSelectSample?.(key)}
-                          className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2.5 rounded-xl text-xs font-bold transition ${
-                            isSelected
+                          className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2.5 rounded-xl text-xs font-bold transition ${isSelected
                               ? "bg-[#163f2c] text-[#d7f27a] shadow-sm ring-1 ring-[#163f2c]"
                               : "bg-[#ede7d5]/60 text-[#3a4d3f] hover:bg-[#ede7d5] border border-[#d8d3bf]/60"
-                          }`}
+                            }`}
                         >
                           <span>{key === "front-yard" ? "🏡 Front Yard" : key === "back-yard" ? "🌸 Backyard" : "🌲 Side Yard"}</span>
                           <span
-                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-                              isSelected ? "bg-[#25523b] text-[#d7f27a]" : "bg-black/5 text-[#5d6b60]"
-                            }`}
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isSelected ? "bg-[#25523b] text-[#d7f27a]" : "bg-black/5 text-[#5d6b60]"
+                              }`}
                           >
                             Score {cfg.initialScore}
                           </span>
@@ -576,7 +571,7 @@ export function LandingPage({
             <div className="text-center max-w-2xl mx-auto">
               <p className="eyebrow text-[#2f7d3a]">Effortless 3-Step Process</p>
               <h2 className="mt-2 font-display text-[clamp(2.2rem,4vw,3.2rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-[#143424]">
-                How NativeYard audits your yard.
+                How NativeYard Works!.
               </h2>
               <p className="mt-3 text-sm sm:text-base text-[#5d6b60]">
                 No plant taxonomy degree needed. Upload any yard photo and let our vision engine do the heavy lifting in seconds.
@@ -598,34 +593,45 @@ export function LandingPage({
                     </span>
                   </div>
 
-                  {/* Visual Preview 1: Camera Viewfinder Mockup */}
+                  {/* Visual Preview 1: Front Yard in Camera Viewfinder */}
                   <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-[#e2dec9] bg-[#143424] mb-4">
                     <img
-                      src="/samples/sample_yard_front_1793414504055.jpg"
-                      alt="Camera capture preview"
-                      className="h-full w-full object-cover opacity-85 group-hover:scale-105 transition duration-500"
+                      src="/samples/front-yard.jpg"
+                      alt="Front yard sample camera capture"
+                      className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="rounded-xl border border-white/40 bg-black/40 backdrop-blur-xs px-3 py-1.5 text-center">
-                        <p className="text-[11px] font-bold text-white flex items-center gap-1.5">
-                          <span className="h-2 w-2 rounded-full bg-[#d7f27a] animate-pulse" />
-                          Whole Yard Frame
-                        </p>
+                    <div className="absolute inset-0 bg-black/25" />
+
+                    {/* Viewfinder Reticle Overlay */}
+                    <div className="absolute inset-2.5 border border-white/35 rounded-xl pointer-events-none flex flex-col justify-between p-2">
+                      <div className="flex items-center justify-between text-[10px] font-bold text-white drop-shadow-sm">
+                        <span className="flex items-center gap-1.5 bg-black/55 px-2 py-0.5 rounded-md backdrop-blur-xs">
+                          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                          Front Yard Frame
+                        </span>
+                        <span className="bg-black/55 px-2 py-0.5 rounded-md backdrop-blur-xs">
+                          Zone 6b · NJ
+                        </span>
+                      </div>
+                      <div className="flex justify-center">
+                        <span className="bg-black/65 text-white text-[9.5px] font-medium px-2.5 py-0.5 rounded-full backdrop-blur-xs border border-white/20">
+                          Align foundation beds &amp; tree canopy
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <h3 className="font-display text-lg font-bold text-[#143424]">
-                    1. Snap your garden or bed
+                    1. Snap foundation or yard
                   </h3>
                   <p className="mt-1.5 text-xs sm:text-sm text-[#5d6b60] leading-relaxed">
-                    Take a photo from your phone or choose an existing photo. Include trees, shrubs, and garden borders.
+                    Take a photo with your phone or upload an existing yard image. Capture foundation shrubs, garden beds, and overarching trees.
                   </p>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-[#f0ece1] flex items-center gap-1.5 text-xs font-semibold text-[#2f7d3a]">
                   <Check className="h-3.5 w-3.5" />
-                  <span>Auto-detects perspective &amp; orientation</span>
+                  <span>Auto-detects perspective, lighting &amp; beds</span>
                 </div>
               </div>
 
@@ -642,19 +648,38 @@ export function LandingPage({
                     </span>
                   </div>
 
-                  {/* Visual Preview 2: Bounding Box Simulation */}
+                  {/* Visual Preview 2: Front Yard with Real Bounding Box Detections */}
                   <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-[#e2dec9] bg-[#143424] mb-4">
                     <img
-                      src="/samples/sample_yard_back_1793414515592.jpg"
-                      alt="AI plant detection overlay"
-                      className="h-full w-full object-cover opacity-85 group-hover:scale-105 transition duration-500"
+                      src="/samples/front-yard.jpg"
+                      alt="Front yard AI detection bounding boxes"
+                      className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
                     />
-                    {/* Simulated Bounding Boxes */}
-                    <div className="absolute top-3 left-3 rounded-lg border-2 border-emerald-400 bg-emerald-950/80 px-2 py-0.5 text-[10px] font-bold text-emerald-200 shadow-md">
-                      #1 Highbush Blueberry · Keystone
+                    <div className="absolute inset-0 bg-black/20" />
+
+                    {/* Bounding Box 1: White Oak Canopy (Top Right) */}
+                    <div className="absolute top-2 right-2 max-w-[62%] rounded-lg border-2 border-emerald-400 bg-emerald-950/90 px-2 py-1 text-[9.5px] font-bold text-emerald-200 shadow-md backdrop-blur-xs">
+                      <p className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        #1 White Oak · Keystone
+                      </p>
+                      <p className="text-[8px] font-normal text-emerald-300/90">Hosts 534+ caterpillar species</p>
                     </div>
-                    <div className="absolute bottom-3 right-3 rounded-lg border-2 border-rose-500 bg-rose-950/85 px-2 py-0.5 text-[10px] font-bold text-rose-200 shadow-md">
-                      #2 Japanese Barberry · Invasive
+
+                    {/* Bounding Box 2: Japanese Barberry Shrub (Bottom Left) */}
+                    <div className="absolute bottom-2.5 left-2 max-w-[60%] rounded-lg border-2 border-rose-500 bg-rose-950/90 px-2 py-1 text-[9.5px] font-bold text-rose-200 shadow-md backdrop-blur-xs">
+                      <p className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                        #2 Japanese Barberry · Invasive
+                      </p>
+                      <p className="text-[8px] font-normal text-rose-300/90">Lyme tick habitat · 1 host only</p>
+                    </div>
+
+                    {/* Center Detection Count Badge */}
+                    <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 flex justify-center pointer-events-none">
+                      <span className="bg-black/70 border border-white/30 text-white text-[9px] font-semibold px-2.5 py-0.5 rounded-full backdrop-blur-xs shadow-md">
+                        6 Plants Identified in Front Yard
+                      </span>
                     </div>
                   </div>
 
@@ -662,17 +687,17 @@ export function LandingPage({
                     2. Instant AI plant detection
                   </h3>
                   <p className="mt-1.5 text-xs sm:text-sm text-[#5d6b60] leading-relaxed">
-                    Gemini Vision pinpoints individual foliage boundaries and matches species against 237 curated New Jersey botanical records.
+                    Gemini Vision pinpoints foliage boundaries, identifying keystone species like White Oak while flagging invasive Japanese Barberry and Burning Bush.
                   </p>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-[#f0ece1] flex items-center gap-1.5 text-xs font-semibold text-[#2f7d3a]">
                   <Check className="h-3.5 w-3.5" />
-                  <span>Interactive canvas lets you adjust or re-scan</span>
+                  <span>Interactive canvas lets you adjust boxes or re-scan</span>
                 </div>
               </div>
 
-              {/* Step 3: Yard Native Score & Eco Swaps */}
+              {/* Step 3: Front Yard Audit Report & Swaps */}
               <div className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-[#e2dec9] bg-white p-5 sm:p-6 shadow-xs hover:shadow-md transition duration-300">
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -681,35 +706,64 @@ export function LandingPage({
                     </span>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-[#faf9f5] border border-[#e2dec9] px-2.5 py-1 text-[11px] font-semibold text-[#5d6b60]">
                       <Sparkles className="h-3.5 w-3.5 text-[#2f7d3a]" />
-                      Eco Score
+                      Actionable Report
                     </span>
                   </div>
 
-                  {/* Visual Preview 3: Score Ring & Native Swap Preview */}
-                  <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-[#e2dec9] bg-[#faf9f5] p-3 flex flex-col justify-between mb-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="grid h-7 w-7 place-items-center rounded-full bg-[#143424] text-xs font-black text-[#d7f27a]">
-                          78
-                        </span>
-                        <div>
-                          <p className="text-[11px] font-bold text-[#143424]">Grade B+ · Good</p>
-                          <p className="text-[9px] text-[#7a806e]">8 Native · 2 Invasives</p>
+                  {/* Visual Preview 3: Front Yard Sample Report Card */}
+                  <div className="relative aspect-16/10 w-full overflow-hidden rounded-2xl border border-[#e2dec9] bg-[#faf9f5] mb-4">
+                    <img
+                      src="/samples/front-yard.jpg"
+                      alt="Front yard audit report results"
+                      className="h-full w-full object-cover opacity-25 group-hover:scale-105 transition duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#faf9f5] via-[#faf9f5]/85 to-transparent p-3 flex flex-col justify-between">
+                      {/* Top Row: Score & Verdict */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#143424] text-xs font-black text-[#d7f27a] shadow-xs">
+                            34
+                          </span>
+                          <div>
+                            <p className="text-[11px] font-bold text-[#143424] leading-tight">
+                              Score 34 · Eco-transitional
+                            </p>
+                            <p className="text-[9px] font-semibold text-[#7a806e]">
+                              2 Native · 2 Invasive · 2 Non-native
+                            </p>
+                          </div>
                         </div>
+                        <span className="rounded-full bg-rose-100 border border-rose-300 px-2 py-0.5 text-[9px] font-bold text-rose-900">
+                          2 Invasives
+                        </span>
                       </div>
-                      <span className="text-[10px] font-bold bg-[#edf3e3] text-[#2f7d3a] rounded-full px-2 py-0.5">
-                        NJ Ecoregion
-                      </span>
-                    </div>
 
-                    <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-2 text-[10px] flex items-center justify-between">
-                      <div>
-                        <p className="font-bold text-rose-900">Replace Barberry</p>
-                        <p className="text-rose-700">Swap with Spicebush</p>
+                      {/* Middle: Priority Native Swap */}
+                      <div className="rounded-xl border border-rose-200 bg-white/95 p-2 shadow-xs backdrop-blur-xs">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="font-bold text-rose-900 flex items-center gap-1">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                            Swap Barberry
+                          </span>
+                          <span className="font-bold text-emerald-800 bg-emerald-100 rounded px-1.5 py-0.2 text-[8.5px]">
+                            +210 Hosts
+                          </span>
+                        </div>
+                        <p className="text-[9px] text-[#5d6b60] mt-0.5 font-medium leading-tight">
+                          Replace with native <span className="font-bold text-[#143424]">Spicebush</span> or <span className="font-bold text-[#143424]">Inkberry</span>
+                        </p>
                       </div>
-                      <span className="font-bold text-emerald-800 bg-emerald-100 rounded-md px-1.5 py-0.5 text-[9px]">
-                        +210 hosts
-                      </span>
+
+                      {/* Bottom: Potential Projected Score */}
+                      <div className="flex items-center justify-between text-[9px] font-semibold text-[#2f7d3a] px-0.5">
+                        <span className="flex items-center gap-1">
+                          <Check className="h-3 w-3" />
+                          White Oak Preserved
+                        </span>
+                        <span className="font-bold text-[#143424]">
+                          Potential Score: 88
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -736,7 +790,7 @@ export function LandingPage({
                 className="inline-flex items-center gap-2 rounded-full bg-[#143424] px-5 py-2.5 text-xs sm:text-sm font-bold text-[#faf9f5] hover:bg-[#20523a] transition shadow-xs"
               >
                 <Sparkles className="h-4 w-4 text-[#d7f27a]" />
-                <span>Try Live Front Yard Demo (78 Score)</span>
+                <span>Try Live Front Yard Demo (Score: 34 → 88 Potential)</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
               <a
