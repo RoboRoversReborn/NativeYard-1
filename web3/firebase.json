@@ -5,5 +5,20 @@
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "**",
+        "destination": "https://nativeyard-web--njnativeyard.us-east4.hosted.app",
+        "type": 302
+      }
+    ]
   }
 }
