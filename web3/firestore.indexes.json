@@ -1,4 +1,29 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "user_profiles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "showOnLeaderboard", "order": "ASCENDING" },
+        { "fieldPath": "ecoPoints", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "user_profiles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "showOnLeaderboard", "order": "ASCENDING" },
+        { "fieldPath": "bestScore", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "user_profiles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "showOnLeaderboard", "order": "ASCENDING" },
+        { "fieldPath": "averageScore", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

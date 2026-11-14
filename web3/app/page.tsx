@@ -9,10 +9,12 @@ import { CameraModal } from "@/components/camera/CameraModal";
 import { PropertyBar } from "@/components/property/PropertyBar";
 import { PropertyManagerModal } from "@/components/property/PropertyManagerModal";
 import { AuthModal } from "@/components/auth/AuthModal";
-import { buildDemoAudit } from "@/lib/plants";
+import { BadgeUnlockToast } from "@/components/gamification/BadgeUnlockToast";
+import { buildDemoAudit, getPlant } from "@/lib/plants";
 import { isNjZip } from "@/lib/nj-data";
 import { compressImageFile, isMobileOrTablet } from "@/lib/camera";
 import { onAuthChange, signOutUser } from "@/lib/firebase/auth";
+import { syncUserGamificationProfile } from "@/lib/firebase/gamification";
 import {
   getPropertiesWithAreas,
   createProperty,
@@ -20,7 +22,7 @@ import {
   saveYardScan,
 } from "@/lib/firebase/properties";
 import { SAMPLE_YARDS, buildSampleAudit, SampleYardKey } from "@/lib/sampleDetections";
-import type { Audit, Property, YardArea, YardScan } from "@/lib/types";
+import type { Audit, BadgeDefinition, Property, YardArea, YardScan } from "@/lib/types";
 
 type Stage = "landing" | "analyzing" | "audit" | "report";
 
@@ -49,6 +51,7 @@ export default function NativeYardV3() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedArea, setSelectedArea] = useState<YardArea | null>(null);
   const [isSavingScan, setIsSavingScan] = useState(false);
+  const [unlockedBadges, setUnlockedBadges] = useState<BadgeDefinition[]>([]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -234,17 +237,57 @@ export default function NativeYardV3() {
     if (!selectedArea || !audit || !photo) return;
     try {
       setIsSavingScan(true);
+      let nativeCount = 0;
+      let nonNativeCount = 0;
+      let invasiveCount = 0;
+      let keystoneCount = 0;
+
+      for (const d of audit.detections) {
+        const plant = d.plantId ? getPlant(d.plantId) : undefined;
+        const status =
+          plant?.status || (d.plantId?.includes("invasive") ? "invasive" : "non-native");
+        if (status === "keystone") {
+          keystoneCount += 1;
+          nativeCount += 1;
+        } else if (status === "native") {
+          nativeCount += 1;
+        } else if (status === "invasive") {
+          invasiveCount += 1;
+        } else {
+          nonNativeCount += 1;
+        }
+      }
+
       await saveYardScan(selectedArea.id, {
         imageBlobOrDataUrl: photo,
         score: audit.score,
         scoreLabel: audit.scoreLabel,
         detections: audit.detections,
         counts: {
-          native: audit.detections.filter((d) => d.plantId && !d.plantId.includes("invasive")).length,
-          invasive: audit.detections.filter((d) => d.plantId && d.plantId.includes("invasive")).length,
+          native: nativeCount,
+          non_native: nonNativeCount,
+          invasive: invasiveCount,
+          keystone: keystoneCount,
         },
+        propertyId: selectedProperty?.id,
       });
-      await loadProperties();
+
+      const updatedProps = await getPropertiesWithAreas();
+      setProperties(updatedProps);
+      if (selectedProperty) {
+        const updatedProp = updatedProps.find((p) => p.id === selectedProperty.id);
+        if (updatedProp) {
+          setSelectedProperty(updatedProp);
+          const updatedArea = updatedProp.yard_areas?.find((a) => a.id === selectedArea.id);
+          if (updatedArea) setSelectedArea(updatedArea);
+        }
+      }
+
+      const { newlyUnlockedBadges } = await syncUserGamificationProfile(updatedProps);
+      if (newlyUnlockedBadges.length > 0) {
+        setUnlockedBadges(newlyUnlockedBadges);
+      }
+
       alert(`Scan successfully saved to ${selectedArea.name}!`);
     } catch (err: any) {
       alert(err.message || "Failed to save scan");
@@ -445,6 +488,10 @@ export default function NativeYardV3() {
       />
 
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      <BadgeUnlockToast
+        badges={unlockedBadges}
+        onDismiss={() => setUnlockedBadges([])}
+      />
     </div>
   );
 }

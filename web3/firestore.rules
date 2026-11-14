@@ -44,5 +44,12 @@ service cloud.firestore {
         }
       }
     }
+
+    // Public-safe gamification & leaderboard profiles
+    match /user_profiles/{userId} {
+      allow read: if resource.data.showOnLeaderboard == true || (isAuthenticated() && request.auth.uid == userId);
+      allow create, update: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
   }
 }

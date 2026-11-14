@@ -321,3 +321,103 @@ export interface YardScan {
   notes?: string;
   created_at: string;
 }
+
+// Gamification & Leaderboard Models
+export type BadgeCategory = "getting_started" | "ecological" | "progress";
+
+export interface EarnedBadge {
+  id: string;
+  earnedAt: string;
+}
+
+export interface BadgeProgress {
+  current: number;
+  target: number;
+  unit?: string;
+}
+
+export interface BadgeDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: BadgeCategory;
+  icon: string;
+  xpReward: number;
+}
+
+export interface ShowcasePlant {
+  plantId: string;
+  commonName: string;
+  scientificName: string;
+  status: PlantStatus;
+  type?: PlantType;
+  lepidoptera?: number;
+}
+
+export interface ShowcaseYardArea {
+  areaId: string;
+  areaName: string;
+  areaType: YardArea["area_type"];
+  sunExposure?: string;
+  soilType?: string;
+  latestScore: number;
+  bestScore: number;
+  grade: string;
+  plantsCount: number;
+  nativeCount: number;
+  keystoneCount: number;
+  invasiveCount: number;
+  caterpillarCapacity: number;
+  photoUrl?: string;
+  lastScannedAt: string;
+  plants: ShowcasePlant[];
+}
+
+export interface UserGamificationProfile {
+  uid: string;
+  displayName: string;
+  city: string;
+  state: string;
+  hardinessZone: string;
+  showOnLeaderboard: boolean;
+  shareYardDetails: boolean;
+  shareYardPhotos: boolean;
+  bestScore: number;
+  latestScore: number;
+  averageScore: number;
+  ecoPoints: number;
+  totalScans: number;
+  totalAreas: number;
+  totalNatives: number;
+  totalKeystones: number;
+  invasivesRemoved: number;
+  caterpillarCapacity: number;
+  badges: EarnedBadge[];
+  showcaseYards: ShowcaseYardArea[];
+  updatedAt: string;
+}
+
+export interface ScoreHistoryPoint {
+  scanId: string;
+  areaId: string;
+  areaName: string;
+  propertyId: string;
+  propertyName: string;
+  score: number;
+  grade: string;
+  nativeCount: number;
+  keystoneCount: number;
+  invasiveCount: number;
+  plantsCount: number;
+  deltaFromPrevious: number | null;
+  createdAt: string;
+}
+
+export type LeaderboardSortBy = "ecoPoints" | "bestScore" | "averageScore";
+
+export interface LeaderboardFilter {
+  sortBy: LeaderboardSortBy;
+  state?: string;
+  city?: string;
+  hardinessZone?: string;
+}

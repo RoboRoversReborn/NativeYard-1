@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Download, FileText, Plus, RotateCcw, ScanLine } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Download, FileText, Plus, RotateCcw, ScanLine, Trophy } from "lucide-react";
 import { Brand } from "./brand";
 import { HeaderAuth } from "./header-auth";
 
@@ -62,17 +62,33 @@ export function AppHeader({
                 <span>🌿</span>
                 <span>Flora DB</span>
               </Link>
+              <Link
+                href="/progress"
+                className="flex items-center gap-1 font-bold text-[#163f2c] hover:text-[#2f7d3a] transition"
+              >
+                <Trophy className="h-3.5 w-3.5 text-[#c78b00]" />
+                <span>Leaderboard</span>
+              </Link>
             </nav>
           )}
 
           {stage !== "landing" && stage !== "admin" && (
-            <Link
-              href="/admin/plants"
-              className="hidden xl:inline-flex items-center gap-1 text-xs font-semibold text-[#2f7d3a] hover:text-[#163f2c] transition"
-            >
-              <span>🌿</span>
-              <span>Flora Database</span>
-            </Link>
+            <div className="hidden xl:inline-flex items-center gap-4">
+              <Link
+                href="/admin/plants"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#2f7d3a] hover:text-[#163f2c] transition"
+              >
+                <span>🌿</span>
+                <span>Flora Database</span>
+              </Link>
+              <Link
+                href="/progress"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#163f2c] hover:text-[#2f7d3a] transition"
+              >
+                <Trophy className="h-3.5 w-3.5 text-[#c78b00]" />
+                <span>Progress &amp; Leaderboard</span>
+              </Link>
+            </div>
           )}
         </div>
 

@@ -11,7 +11,9 @@
     "firebase:login": "npx firebase-tools login",
     "firebase:deploy-rules": "npx firebase-tools deploy --only firestore:rules,storage",
     "firebase:deploy": "npx firebase-tools deploy",
-    "seed:db": "node scripts/seed-firebase-plants.mjs"
+    "seed:db": "node scripts/seed-firebase-plants.mjs",
+    "seed:leaderboard": "node scripts/seed-leaderboard-demo.mjs",
+    "seed:leaderboard:clean": "node scripts/seed-leaderboard-demo.mjs --clean"
   },
   "dependencies": {
     "firebase": "^13.2.0",
