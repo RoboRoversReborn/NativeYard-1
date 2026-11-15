@@ -79,8 +79,8 @@ export function AuditView({
   const [selectedId, setSelectedId] = useState(
     audit.detections.find((detection) => getPlant(detection.plantId)?.status === "invasive")
       ?.id ??
-    audit.detections[0]?.id ??
-    "",
+      audit.detections[0]?.id ??
+      "",
   );
 
   const [showPickerModal, setShowPickerModal] = useState(false);
@@ -105,20 +105,20 @@ export function AuditView({
     audit.detections[0];
   const selectedPlant: Plant | undefined = selectedDetection
     ? getPlant(selectedDetection.plantId) || ({
-      id: selectedDetection.plantId,
-      commonName: (selectedDetection as any).commonName || selectedDetection.plantId.replace(/-/g, " "),
-      scientificName: (selectedDetection as any).scientificName || selectedDetection.plantId,
-      status: "native" as const,
-      njStatus: "NATIVE" as const,
-      type: "Perennial" as const,
-      sun: "Full Sun / Partial Shade",
-      moisture: "Medium",
-      bloom: "Summer",
-      height: "2-4 ft",
-      description: selectedDetection.note || "Detected plant",
-      swapIds: [],
-      lepidoptera: 10,
-    } as Plant)
+        id: selectedDetection.plantId,
+        commonName: (selectedDetection as any).commonName || selectedDetection.plantId.replace(/-/g, " "),
+        scientificName: (selectedDetection as any).scientificName || selectedDetection.plantId,
+        status: "native" as const,
+        njStatus: "NATIVE" as const,
+        type: "Perennial" as const,
+        sun: "Full Sun / Partial Shade",
+        moisture: "Medium",
+        bloom: "Summer",
+        height: "2-4 ft",
+        description: selectedDetection.note || "Detected plant",
+        swapIds: [],
+        lepidoptera: 10,
+      } as Plant)
     : undefined;
 
   const sortedDetections = useMemo(() => {
@@ -161,9 +161,9 @@ export function AuditView({
   const highPrioritySwaps = audit.swaps.filter((swap) => swap.priority === "high");
   const swapNames = selectedPlant
     ? (selectedPlant.swapIds ?? [])
-      .slice(0, 3)
-      .map((id: string) => getPlant(id)?.commonName)
-      .filter(Boolean)
+        .slice(0, 3)
+        .map((id: string) => getPlant(id)?.commonName)
+        .filter(Boolean)
     : [];
 
   function updateDetections(next: Detection[]) {
@@ -181,15 +181,15 @@ export function AuditView({
     const next = audit.detections.map((detection) =>
       detection.id === detectionId
         ? {
-          ...detection,
-          plantId,
-          verified: true,
-          verificationMethod: "top_match" as const,
-          needsReview: false,
-          topMatches: undefined,
-          confidence: Math.max(detection.confidence, 0.95),
-          source: "top_match_confirmed",
-        }
+            ...detection,
+            plantId,
+            verified: true,
+            verificationMethod: "top_match" as const,
+            needsReview: false,
+            topMatches: undefined,
+            confidence: Math.max(detection.confidence, 0.95),
+            source: "top_match_confirmed",
+          }
         : detection,
     );
     updateDetections(next);
@@ -201,13 +201,13 @@ export function AuditView({
     const next = audit.detections.map((d) =>
       d.id === detectionId
         ? {
-          ...d,
-          verified: true,
-          verificationMethod: "user_confirmed" as const,
-          needsReview: false,
-          confidence: Math.max(d.confidence, 0.95),
-          source: d.source || "user_confirmed",
-        }
+            ...d,
+            verified: true,
+            verificationMethod: "user_confirmed" as const,
+            needsReview: false,
+            confidence: Math.max(d.confidence, 0.95),
+            source: d.source || "user_confirmed",
+          }
         : d,
     );
     updateDetections(next);
@@ -219,10 +219,10 @@ export function AuditView({
     const next = audit.detections.map((d) =>
       d.id === detectionId
         ? {
-          ...d,
-          verified: false,
-          verificationMethod: undefined,
-        }
+            ...d,
+            verified: false,
+            verificationMethod: undefined,
+          }
         : d,
     );
     updateDetections(next);
@@ -306,14 +306,14 @@ export function AuditView({
     const next = audit.detections.map((d) =>
       d.id === selectedDetection.id
         ? {
-          ...d,
-          plantId: plant.id,
-          confidence: 1.0,
-          verified: true,
-          verificationMethod: "manual_select" as const,
-          needsReview: false,
-          source: "manual_selection",
-        }
+            ...d,
+            plantId: plant.id,
+            confidence: 1.0,
+            verified: true,
+            verificationMethod: "manual_select" as const,
+            needsReview: false,
+            source: "manual_selection",
+          }
         : d
     );
     updateDetections(next);
@@ -326,14 +326,14 @@ export function AuditView({
     const next = audit.detections.map((d) =>
       d.id === selectedDetection.id
         ? {
-          ...d,
-          plantId: candidate.plantId,
-          confidence: Math.max(candidate.confidence, 0.95),
-          verified: true,
-          verificationMethod: "macro_camera" as const,
-          needsReview: false,
-          source: "macro_leaf_match",
-        }
+            ...d,
+            plantId: candidate.plantId,
+            confidence: Math.max(candidate.confidence, 0.95),
+            verified: true,
+            verificationMethod: "macro_camera" as const,
+            needsReview: false,
+            source: "macro_leaf_match",
+          }
         : d
     );
     updateDetections(next);
@@ -451,12 +451,13 @@ export function AuditView({
                     {metric.label}
                   </p>
                   <p
-                    className={`mt-0.5 font-display text-[1.25rem] font-semibold leading-none ${metric.tone === "bad"
+                    className={`mt-0.5 font-display text-[1.25rem] font-semibold leading-none ${
+                      metric.tone === "bad"
                         ? "text-[#f0a38e]"
                         : metric.tone === "warn"
                           ? "text-[#f2d18d]"
                           : "text-[#d7f27a]"
-                      }`}
+                    }`}
                   >
                     {metric.value}
                   </p>
@@ -467,43 +468,43 @@ export function AuditView({
 
           {/* 3. Interactive Yard Photo with Bounding Boxes */}
           <section className="audit-grid-photo overflow-hidden rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] shadow-[0_18px_45px_rgba(45,61,42,0.08)]">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5e0d1] px-4 py-3 sm:px-5">
-              <div className="flex items-center gap-2">
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-[#163f2c] text-[#d7f27a]">
-                  <ScanLine className="h-4 w-4" />
-                </span>
-                <div>
-                  <p className="text-[0.76rem] font-bold text-[#263b2b]">
-                    {audit.detections.length} plants detected
-                  </p>
-                  <p className="text-[0.64rem] text-[#8b9182]">
-                    Tap a box to inspect · {audit.location.ecoregion}
-                  </p>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5e0d1] px-4 py-3 sm:px-5">
+                <div className="flex items-center gap-2">
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-[#163f2c] text-[#d7f27a]">
+                    <ScanLine className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="text-[0.76rem] font-bold text-[#263b2b]">
+                      {audit.detections.length} plants detected
+                    </p>
+                    <p className="text-[0.64rem] text-[#8b9182]">
+                      Tap a box to inspect · {audit.location.ecoregion}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {NJ_STATUS_ORDER.map((status) => (
+                    <span
+                      key={status}
+                      className="inline-flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-[0.08em] text-[#7a806e]"
+                    >
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ background: NJ_STATUS_META[status].color }}
+                      />
+                      {NJ_STATUS_META[status].short}
+                    </span>
+                  ))}
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {NJ_STATUS_ORDER.map((status) => (
-                  <span
-                    key={status}
-                    className="inline-flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-[0.08em] text-[#7a806e]"
-                  >
-                    <span
-                      className="h-2 w-2 rounded-full"
-                      style={{ background: NJ_STATUS_META[status].color }}
-                    />
-                    {NJ_STATUS_META[status].short}
-                  </span>
-                ))}
-              </div>
-            </div>
 
-            <div data-demo-target="audit-boxes" className="p-3 sm:p-4">
-              <BoundingBoxOverlay
-                audit={audit}
-                photoUrl={photo}
-                selectedId={selectedId}
-                orderedDetections={sortedDetections}
-                onSelectDetection={(id) => {
+              <div data-demo-target="audit-boxes" className="p-3 sm:p-4">
+                <BoundingBoxOverlay
+                  audit={audit}
+                  photoUrl={photo}
+                  selectedId={selectedId}
+                  orderedDetections={sortedDetections}
+                  onSelectDetection={(id) => {
                   setSelectedId(id);
                   if (typeof window !== "undefined" && window.innerWidth < 768) {
                     setTimeout(() => {
@@ -514,52 +515,52 @@ export function AuditView({
                     }, 50);
                   }
                 }}
-                onDeleteDetection={(id) => removeDetection(id)}
-                onUpdateDetectionBox={(id, newBox) => {
-                  const next = audit.detections.map((d) =>
-                    d.id === id ? { ...d, box: newBox } : d
-                  );
-                  updateDetections(next);
-                }}
-                onIdentifyRegion={async (box, existingId) => {
-                  try {
-                    const res = await fetch("/api/reidentify-box", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        image: photo,
-                        box,
-                        zip: audit.location.zip,
-                        existingDetectionId: existingId,
-                      }),
-                    });
+                  onDeleteDetection={(id) => removeDetection(id)}
+                  onUpdateDetectionBox={(id, newBox) => {
+                    const next = audit.detections.map((d) =>
+                      d.id === id ? { ...d, box: newBox } : d
+                    );
+                    updateDetections(next);
+                  }}
+                  onIdentifyRegion={async (box, existingId) => {
+                    try {
+                      const res = await fetch("/api/reidentify-box", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          image: photo,
+                          box,
+                          zip: audit.location.zip,
+                          existingDetectionId: existingId,
+                        }),
+                      });
 
-                    if (!res.ok) {
-                      const err = await res.json().catch(() => ({}));
-                      alert(err.error || "Failed to identify region. Try another plant area.");
-                      return;
-                    }
-
-                    const data = await res.json();
-                    if (data.detection) {
-                      let nextDetections = [...audit.detections];
-                      if (existingId) {
-                        nextDetections = nextDetections.map((d) =>
-                          d.id === existingId ? data.detection : d
-                        );
-                      } else {
-                        nextDetections.push(data.detection);
+                      if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        alert(err.error || "Failed to identify region. Try another plant area.");
+                        return;
                       }
-                      updateDetections(nextDetections);
-                      setSelectedId(data.detection.id);
+
+                      const data = await res.json();
+                      if (data.detection) {
+                        let nextDetections = [...audit.detections];
+                        if (existingId) {
+                          nextDetections = nextDetections.map((d) =>
+                            d.id === existingId ? data.detection : d
+                          );
+                        } else {
+                          nextDetections.push(data.detection);
+                        }
+                        updateDetections(nextDetections);
+                        setSelectedId(data.detection.id);
+                      }
+                    } catch (err: any) {
+                      alert(err.message || "Failed to re-identify region");
                     }
-                  } catch (err: any) {
-                    alert(err.message || "Failed to re-identify region");
-                  }
-                }}
-              />
-            </div>
-          </section>
+                  }}
+                />
+              </div>
+            </section>
 
           {/* 4. Quick-Switch Horizontal Plant Chips Bar (Mobile Only) */}
           <div className="audit-grid-chips">
@@ -592,10 +593,11 @@ export function AuditView({
                         }, 50);
                       }
                     }}
-                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition shadow-xs ${isSelected
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition shadow-xs ${
+                      isSelected
                         ? "bg-[#163f2c] text-[#f7f4e9] ring-2 ring-[#d7f27a] shadow-md"
                         : "bg-[#fbfaf4] text-[#1d2a21] border border-[#d8d3bf] hover:bg-[#ede7d5]"
-                      }`}
+                    }`}
                   >
                     <span
                       className="grid h-4 w-4 place-items-center rounded-full text-[9px] text-white"
@@ -619,86 +621,86 @@ export function AuditView({
 
           {/* 2. Complete Plant Inventory & Ecological Breakdown Tally */}
           <section className="audit-grid-tally rounded-2xl border border-[#d5cfbd] bg-[#fbfaf4] p-4 sm:p-5 shadow-xs">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5e0d1] pb-3 mb-3.5">
-              <div>
-                <h3 className="text-[0.82rem] font-bold text-[#163f2c]">
-                  Identified Plant Inventory Tally
-                </h3>
-                <p className="text-[0.64rem] text-[#7a806e]">
-                  Full count of the {plantCounts.total} plants identified in this yard frame
-                </p>
-              </div>
-              <div className="flex items-center gap-1.5 text-[0.66rem] font-bold text-[#3f7d45] bg-[#edf3e3] px-2.5 py-1 rounded-full border border-[#c9d9b7]">
-                <span>🌿 {plantCounts.native + plantCounts.keystone} of {plantCounts.total} Native ({audit.nativeShare}%)</span>
-              </div>
-            </div>
-
-            {/* 5-Column Exact Plant Tally: Total = Keystone + Native + Non-native + Invasive */}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-              <div className="col-span-2 sm:col-span-1 rounded-xl border border-[#d9d4c4] bg-[#f7f5ec] p-2.5 text-center">
-                <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#7a806e]">
-                  Total Plants
-                </p>
-                <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#163f2c]">
-                  {plantCounts.total}
-                </p>
-                <p className="mt-1 text-[0.56rem] text-[#8b9182]">In this frame</p>
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e5e0d1] pb-3 mb-3.5">
+                <div>
+                  <h3 className="text-[0.82rem] font-bold text-[#163f2c]">
+                    Identified Plant Inventory Tally
+                  </h3>
+                  <p className="text-[0.64rem] text-[#7a806e]">
+                    Full count of the {plantCounts.total} plants identified in this yard frame
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 text-[0.66rem] font-bold text-[#3f7d45] bg-[#edf3e3] px-2.5 py-1 rounded-full border border-[#c9d9b7]">
+                  <span>🌿 {plantCounts.native + plantCounts.keystone} of {plantCounts.total} Native ({audit.nativeShare}%)</span>
+                </div>
               </div>
 
-              <div className="rounded-xl border border-[#bcd79a] bg-[#e7f2d8] p-2.5 text-center">
-                <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#2f7d3a]">
-                  Keystone Native
-                </p>
-                <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#2f7d3a]">
-                  {plantCounts.keystone}
-                </p>
-                <p className="mt-1 text-[0.56rem] text-[#2f7d3a]/80">Top food-web</p>
+              {/* 5-Column Exact Plant Tally: Total = Keystone + Native + Non-native + Invasive */}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                <div className="col-span-2 sm:col-span-1 rounded-xl border border-[#d9d4c4] bg-[#f7f5ec] p-2.5 text-center">
+                  <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#7a806e]">
+                    Total Plants
+                  </p>
+                  <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#163f2c]">
+                    {plantCounts.total}
+                  </p>
+                  <p className="mt-1 text-[0.56rem] text-[#8b9182]">In this frame</p>
+                </div>
+
+                <div className="rounded-xl border border-[#bcd79a] bg-[#e7f2d8] p-2.5 text-center">
+                  <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#2f7d3a]">
+                    Keystone Native
+                  </p>
+                  <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#2f7d3a]">
+                    {plantCounts.keystone}
+                  </p>
+                  <p className="mt-1 text-[0.56rem] text-[#2f7d3a]/80">Top food-web</p>
+                </div>
+
+                <div className="rounded-xl border border-[#c9d9b7] bg-[#edf3e3] p-2.5 text-center">
+                  <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#5d8153]">
+                    Native Flora
+                  </p>
+                  <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#5d8153]">
+                    {plantCounts.native}
+                  </p>
+                  <p className="mt-1 text-[0.56rem] text-[#5d8153]/80">NJ adapted</p>
+                </div>
+
+                <div className="rounded-xl border border-[#e7d09b] bg-[#faf1dc] p-2.5 text-center">
+                  <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#a87a2c]">
+                    Non-Native
+                  </p>
+                  <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#a87a2c]">
+                    {plantCounts.nonNative}
+                  </p>
+                  <p className="mt-1 text-[0.56rem] text-[#a87a2c]/80">Benign low risk</p>
+                </div>
+
+                <div className="rounded-xl border border-[#e7b8a8] bg-[#fae8e1] p-2.5 text-center">
+                  <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#b6533d]">
+                    Invasive
+                  </p>
+                  <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#b6533d]">
+                    {plantCounts.invasive}
+                  </p>
+                  <p className="mt-1 text-[0.56rem] text-[#b6533d]/80">Priority removal</p>
+                </div>
               </div>
 
-              <div className="rounded-xl border border-[#c9d9b7] bg-[#edf3e3] p-2.5 text-center">
-                <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#5d8153]">
-                  Native Flora
-                </p>
-                <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#5d8153]">
-                  {plantCounts.native}
-                </p>
-                <p className="mt-1 text-[0.56rem] text-[#5d8153]/80">NJ adapted</p>
+              {/* Action Insights Strip */}
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2.5 border-t border-[#e8e4d5] text-[0.66rem]">
+                <div className="flex items-center gap-1.5 text-[#5d6b60]">
+                  <span className="font-bold text-[#163f2c]">{audit.swaps.length}</span> native swaps available
+                </div>
+                <div className="flex items-center gap-1.5 text-[#5d6b60]">
+                  <span className="font-bold text-[#163f2c]">{audit.hostGenera}</span> caterpillar host genera
+                </div>
+                <div className="flex items-center gap-1.5 text-[#5d6b60]">
+                  <span className="font-bold text-[#b6533d]">{audit.invasiveShare}%</span> invasive cover pressure
+                </div>
               </div>
-
-              <div className="rounded-xl border border-[#e7d09b] bg-[#faf1dc] p-2.5 text-center">
-                <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#a87a2c]">
-                  Non-Native
-                </p>
-                <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#a87a2c]">
-                  {plantCounts.nonNative}
-                </p>
-                <p className="mt-1 text-[0.56rem] text-[#a87a2c]/80">Benign low risk</p>
-              </div>
-
-              <div className="rounded-xl border border-[#e7b8a8] bg-[#fae8e1] p-2.5 text-center">
-                <p className="text-[0.56rem] font-bold uppercase tracking-wider text-[#b6533d]">
-                  Invasive
-                </p>
-                <p className="mt-1 font-display text-[1.55rem] font-bold leading-none text-[#b6533d]">
-                  {plantCounts.invasive}
-                </p>
-                <p className="mt-1 text-[0.56rem] text-[#b6533d]/80">Priority removal</p>
-              </div>
-            </div>
-
-            {/* Action Insights Strip */}
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2.5 border-t border-[#e8e4d5] text-[0.66rem]">
-              <div className="flex items-center gap-1.5 text-[#5d6b60]">
-                <span className="font-bold text-[#163f2c]">{audit.swaps.length}</span> native swaps available
-              </div>
-              <div className="flex items-center gap-1.5 text-[#5d6b60]">
-                <span className="font-bold text-[#163f2c]">{audit.hostGenera}</span> caterpillar host genera
-              </div>
-              <div className="flex items-center gap-1.5 text-[#5d6b60]">
-                <span className="font-bold text-[#b6533d]">{audit.invasiveShare}%</span> invasive cover pressure
-              </div>
-            </div>
-          </section>
+            </section>
 
           {/* 5. Selected Plant Detail & Verification Inspector */}
           {selectedPlant && selectedDetection && (
@@ -707,104 +709,105 @@ export function AuditView({
               className="audit-grid-inspector rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] p-5 shadow-xs"
             >
               <div className="flex items-start justify-between gap-3">
-                <StatusBadge
-                  status={selectedPlant.status}
-                  njStatus={selectedPlant.njStatus}
-                />
-                {selectedDetection.verified ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#e3f4e5] px-2.5 py-1 text-[0.64rem] font-bold text-[#1b5e20] shadow-xs">
-                    <Check className="h-3 w-3 stroke-[3] text-[#2e7d32]" />
-                    Verified ({Math.round(selectedDetection.confidence * 100)}%)
-                  </span>
-                ) : (
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[0.62rem] font-bold ${selectedDetection.confidence < 0.75
-                        ? "bg-[#fdf1d6] text-[#8a6420]"
-                        : "bg-[#eaf1e3] text-[#2c5b31]"
+                  <StatusBadge
+                    status={selectedPlant.status}
+                    njStatus={selectedPlant.njStatus}
+                  />
+                  {selectedDetection.verified ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#e3f4e5] px-2.5 py-1 text-[0.64rem] font-bold text-[#1b5e20] shadow-xs">
+                      <Check className="h-3 w-3 stroke-[3] text-[#2e7d32]" />
+                      Verified ({Math.round(selectedDetection.confidence * 100)}%)
+                    </span>
+                  ) : (
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[0.62rem] font-bold ${
+                        selectedDetection.confidence < 0.75
+                          ? "bg-[#fdf1d6] text-[#8a6420]"
+                          : "bg-[#eaf1e3] text-[#2c5b31]"
                       }`}
+                    >
+                      {Math.round(selectedDetection.confidence * 100)}% match
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 mt-3 mb-1">
+                  <span
+                    className="grid h-6 w-6 place-items-center rounded-full text-[0.62rem] font-bold text-white shadow-xs"
+                    style={{ background: selectedDetection.verified ? "#2e7d32" : getStatusMeta(selectedPlant).color }}
                   >
-                    {Math.round(selectedDetection.confidence * 100)}% match
+                    {selectedDisplayNumber}
                   </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 mt-3 mb-1">
-                <span
-                  className="grid h-6 w-6 place-items-center rounded-full text-[0.62rem] font-bold text-white shadow-xs"
-                  style={{ background: selectedDetection.verified ? "#2e7d32" : getStatusMeta(selectedPlant).color }}
-                >
-                  {selectedDisplayNumber}
-                </span>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#8b9182]">
-                  Box #{selectedDisplayNumber} in yard frame
-                </span>
-                {selectedDetection.verified && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#2e7d32]">
-                    · <Check className="h-3 w-3 stroke-[3]" /> Verified
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#8b9182]">
+                    Box #{selectedDisplayNumber} in yard frame
                   </span>
-                )}
-              </div>
+                  {selectedDetection.verified && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#2e7d32]">
+                      · <Check className="h-3 w-3 stroke-[3]" /> Verified
+                    </span>
+                  )}
+                </div>
 
-              <h2 className="font-display text-[1.7rem] font-semibold leading-[1.02] tracking-[-0.035em] text-[#163f2c]">
-                {selectedPlant.commonName}
-              </h2>
-              <p className="text-[0.74rem] italic text-[#8b9182]">
-                {selectedPlant.scientificName}
-              </p>
-              <p className="mt-3 text-[0.8rem] leading-6 text-[#5d6b60]">
-                {selectedPlant.description}
-              </p>
+                <h2 className="font-display text-[1.7rem] font-semibold leading-[1.02] tracking-[-0.035em] text-[#163f2c]">
+                  {selectedPlant.commonName}
+                </h2>
+                <p className="text-[0.74rem] italic text-[#8b9182]">
+                  {selectedPlant.scientificName}
+                </p>
+                <p className="mt-3 text-[0.8rem] leading-6 text-[#5d6b60]">
+                  {selectedPlant.description}
+                </p>
 
-              {/* Rematch & Leaf Close-Up Verification Action Bar */}
-              <div className="mt-3.5 flex flex-wrap gap-2">
-                {!selectedDetection.verified ? (
-                  <button
-                    type="button"
-                    onClick={() => handleConfirmCurrentPlant(selectedDetection.id)}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#b8dab9] bg-[#eef7ee] px-3.5 py-2 text-xs font-bold text-[#1b5e20] shadow-xs transition hover:bg-[#d8eed7]"
-                    title="Confirm this plant identification is accurate"
-                  >
-                    <Check className="h-3.5 w-3.5 text-[#2e7d32] stroke-[2.5]" />
-                    Confirm Match
-                  </button>
-                ) : (
-                  <div className="inline-flex items-center gap-1.5 rounded-xl border border-[#b8dab9] bg-[#f0f8ef] px-3 py-1.5 text-[0.72rem] font-semibold text-[#1b5e20]">
-                    <Check className="h-3.5 w-3.5 stroke-[2.5] text-[#2e7d32]" />
-                    <span>Verified Match</span>
+                {/* Rematch & Leaf Close-Up Verification Action Bar */}
+                <div className="mt-3.5 flex flex-wrap gap-2">
+                  {!selectedDetection.verified ? (
                     <button
                       type="button"
-                      onClick={() => handleUnverify(selectedDetection.id)}
-                      className="ml-1 text-[10px] text-[#5c7a5f] underline hover:text-[#1b5e20]"
-                      title="Reset verification state"
+                      onClick={() => handleConfirmCurrentPlant(selectedDetection.id)}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#b8dab9] bg-[#eef7ee] px-3.5 py-2 text-xs font-bold text-[#1b5e20] shadow-xs transition hover:bg-[#d8eed7]"
+                      title="Confirm this plant identification is accurate"
                     >
-                      (undo)
+                      <Check className="h-3.5 w-3.5 text-[#2e7d32] stroke-[2.5]" />
+                      Confirm Match
                     </button>
-                  </div>
-                )}
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 rounded-xl border border-[#b8dab9] bg-[#f0f8ef] px-3 py-1.5 text-[0.72rem] font-semibold text-[#1b5e20]">
+                      <Check className="h-3.5 w-3.5 stroke-[2.5] text-[#2e7d32]" />
+                      <span>Verified Match</span>
+                      <button
+                        type="button"
+                        onClick={() => handleUnverify(selectedDetection.id)}
+                        className="ml-1 text-[10px] text-[#5c7a5f] underline hover:text-[#1b5e20]"
+                        title="Reset verification state"
+                      >
+                        (undo)
+                      </button>
+                    </div>
+                  )}
 
-                <button
-                  type="button"
-                  onClick={() => setShowPickerModal(true)}
-                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#c3bc9f] bg-white px-3 py-2 text-xs font-bold text-[#163f2c] shadow-xs transition hover:bg-[#f3f0e6]"
-                  title="Search prepopulated NJ plant catalog to rematch this plant"
-                >
-                  <Search className="h-3.5 w-3.5 text-[#3f7d45]" />
-                  Rematch Plant
-                </button>
-                <button
-                  type="button"
-                  onClick={handleTriggerCamera}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#163f2c] px-3.5 py-2 text-xs font-bold text-[#f7f4e9] shadow-xs transition hover:bg-[#22553b]"
-                  title="Snap close-up leaf photo with camera for Pl@ntNet verification"
-                >
-                  <Camera className="h-3.5 w-3.5 text-[#d7f27a]" />
-                  Snap Leaf Photo
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowPickerModal(true)}
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#c3bc9f] bg-white px-3 py-2 text-xs font-bold text-[#163f2c] shadow-xs transition hover:bg-[#f3f0e6]"
+                    title="Search prepopulated NJ plant catalog to rematch this plant"
+                  >
+                    <Search className="h-3.5 w-3.5 text-[#3f7d45]" />
+                    Rematch Plant
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleTriggerCamera}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#163f2c] px-3.5 py-2 text-xs font-bold text-[#f7f4e9] shadow-xs transition hover:bg-[#22553b]"
+                    title="Snap close-up leaf photo with camera for Pl@ntNet verification"
+                  >
+                    <Camera className="h-3.5 w-3.5 text-[#d7f27a]" />
+                    Snap Leaf Photo
+                  </button>
+                </div>
 
-              {!selectedDetection.verified &&
-                (selectedDetection.needsReview ||
-                  selectedDetection.confidence < 0.75) && (
+                {!selectedDetection.verified &&
+                  (selectedDetection.needsReview ||
+                    selectedDetection.confidence < 0.75) && (
                   <div className="mt-3 rounded-xl border border-[#e7d09b] bg-[#fdf6e6] px-3 py-3 text-[0.7rem] leading-5 text-[#7b6228]">
                     <p className="flex items-center gap-1.5 font-bold">
                       <CircleAlert className="h-4 w-4 shrink-0" />
@@ -865,181 +868,183 @@ export function AuditView({
                   </div>
                 )}
 
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                {[
-                  { icon: Sun, label: "Light", value: selectedPlant.sun },
-                  { icon: Droplets, label: "Water", value: selectedPlant.moisture },
-                  { icon: CalendarDays, label: "Bloom", value: selectedPlant.bloom },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-xl border border-[#e4dfd0] bg-[#f7f4e9] px-2.5 py-2"
-                  >
-                    <p className="flex items-center gap-1 text-[0.55rem] font-bold uppercase tracking-[0.08em] text-[#9a9f91]">
-                      <item.icon className="h-3 w-3" />
-                      {item.label}
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {[
+                    { icon: Sun, label: "Light", value: selectedPlant.sun },
+                    { icon: Droplets, label: "Water", value: selectedPlant.moisture },
+                    { icon: CalendarDays, label: "Bloom", value: selectedPlant.bloom },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-xl border border-[#e4dfd0] bg-[#f7f4e9] px-2.5 py-2"
+                    >
+                      <p className="flex items-center gap-1 text-[0.55rem] font-bold uppercase tracking-[0.08em] text-[#9a9f91]">
+                        <item.icon className="h-3 w-3" />
+                        {item.label}
+                      </p>
+                      <p className="mt-1 text-[0.64rem] font-semibold leading-4 text-[#425445]">
+                        {item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {selectedPlant.lepidoptera ? (
+                  <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#edf3e3] px-3 py-2.5 text-[0.7rem] font-semibold text-[#3f7d45]">
+                    <Bug className="h-4 w-4 shrink-0" />
+                    Hosts {selectedPlant.lepidoptera}+ caterpillar species in NJ
+                  </div>
+                ) : selectedPlant.status !== "native" &&
+                  selectedPlant.status !== "keystone" ? (
+                  <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#faf1dc] px-3 py-2.5 text-[0.7rem] font-semibold text-[#8a6420]">
+                    <Bug className="h-4 w-4 shrink-0" />
+                    Hosts few or no New Jersey caterpillars
+                  </div>
+                ) : null}
+
+                {selectedPlant.status === "invasive" && (
+                  <div className="mt-3 flex items-start gap-2 rounded-xl bg-[#fae8e1] px-3 py-2.5 text-[0.7rem] leading-5 text-[#9c4634]">
+                    <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>
+                      <strong>
+                        {selectedPlant.njStatus === "INVASIVE_WATCHLIST"
+                          ? "Watchlist priority."
+                          : "High removal priority."}
+                      </strong>{" "}
+                      {selectedDetection.note ?? "Spreads into nearby habitat."}
+                    </span>
+                  </div>
+                )}
+
+                {selectedPlant.status === "keystone" && (
+                  <div className="mt-3 flex items-start gap-2 rounded-xl bg-[#e7f2d8] px-3 py-2.5 text-[0.7rem] leading-5 text-[#3f7d45]">
+                    <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>
+                      <strong>Keep this one.</strong> Add native companions around
+                      it to extend the bloom and cover sequence.
+                    </span>
+                  </div>
+                )}
+
+                {swapNames.length > 0 && (
+                  <div className="mt-3 rounded-xl border border-[#d9d4c4] bg-[#f7f4e9] px-3 py-2.5">
+                    <p className="text-[0.56rem] font-bold uppercase tracking-[0.1em] text-[#8b9182]">
+                      Native swap matches
                     </p>
-                    <p className="mt-1 text-[0.64rem] font-semibold leading-4 text-[#425445]">
-                      {item.value}
+                    <p className="mt-1 text-[0.72rem] font-semibold leading-5 text-[#425445]">
+                      {swapNames.join(" · ")}
                     </p>
                   </div>
-                ))}
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => removeDetection(selectedDetection.id)}
+                  disabled={audit.detections.length <= 1}
+                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#d8d3bf] bg-[#fbfaf4] px-3 py-2 text-[0.68rem] font-bold text-[#7a806e] transition hover:border-[#c2b9a2] hover:text-[#5d4a3a] disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {audit.detections.length <= 1
+                    ? "Keep at least one plant in the audit"
+                    : "Not a plant? Remove from audit"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onReport}
+                  className="mt-4 inline-flex w-full items-center justify-between rounded-xl bg-[#163f2c] px-3.5 py-3 text-[0.74rem] font-bold text-[#f7f4e9] transition hover:bg-[#22553b]"
+                >
+                  See the full plan
+                  <ArrowRight className="h-4 w-4 text-[#d7f27a]" />
+                </button>
+              </section>
+            )}
+
+            {/* 6. Complete "Plants in this frame" List */}
+            <section className="audit-grid-list rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] shadow-xs">
+              <div className="flex items-center justify-between border-b border-[#e5e0d1] px-4 py-3">
+                <p className="text-[0.74rem] font-bold text-[#263b2b]">
+                  Plants in this frame
+                </p>
+                <span className="text-[0.62rem] font-semibold text-[#8b9182]">
+                  {audit.detections.length} found
+                </span>
               </div>
-
-              {selectedPlant.lepidoptera ? (
-                <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#edf3e3] px-3 py-2.5 text-[0.7rem] font-semibold text-[#3f7d45]">
-                  <Bug className="h-4 w-4 shrink-0" />
-                  Hosts {selectedPlant.lepidoptera}+ caterpillar species in NJ
-                </div>
-              ) : selectedPlant.status !== "native" &&
-                selectedPlant.status !== "keystone" ? (
-                <div className="mt-3 flex items-center gap-2 rounded-xl bg-[#faf1dc] px-3 py-2.5 text-[0.7rem] font-semibold text-[#8a6420]">
-                  <Bug className="h-4 w-4 shrink-0" />
-                  Hosts few or no New Jersey caterpillars
-                </div>
-              ) : null}
-
-              {selectedPlant.status === "invasive" && (
-                <div className="mt-3 flex items-start gap-2 rounded-xl bg-[#fae8e1] px-3 py-2.5 text-[0.7rem] leading-5 text-[#9c4634]">
-                  <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>
-                    <strong>
-                      {selectedPlant.njStatus === "INVASIVE_WATCHLIST"
-                        ? "Watchlist priority."
-                        : "High removal priority."}
-                    </strong>{" "}
-                    {selectedDetection.note ?? "Spreads into nearby habitat."}
-                  </span>
-                </div>
-              )}
-
-              {selectedPlant.status === "keystone" && (
-                <div className="mt-3 flex items-start gap-2 rounded-xl bg-[#e7f2d8] px-3 py-2.5 text-[0.7rem] leading-5 text-[#3f7d45]">
-                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>
-                    <strong>Keep this one.</strong> Add native companions around
-                    it to extend the bloom and cover sequence.
-                  </span>
-                </div>
-              )}
-
-              {swapNames.length > 0 && (
-                <div className="mt-3 rounded-xl border border-[#d9d4c4] bg-[#f7f4e9] px-3 py-2.5">
-                  <p className="text-[0.56rem] font-bold uppercase tracking-[0.1em] text-[#8b9182]">
-                    Native swap matches
-                  </p>
-                  <p className="mt-1 text-[0.72rem] font-semibold leading-5 text-[#425445]">
-                    {swapNames.join(" · ")}
-                  </p>
-                </div>
-              )}
-
-              <button
-                type="button"
-                onClick={() => removeDetection(selectedDetection.id)}
-                disabled={audit.detections.length <= 1}
-                className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#d8d3bf] bg-[#fbfaf4] px-3 py-2 text-[0.68rem] font-bold text-[#7a806e] transition hover:border-[#c2b9a2] hover:text-[#5d4a3a] disabled:cursor-not-allowed disabled:opacity-45"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                {audit.detections.length <= 1
-                  ? "Keep at least one plant in the audit"
-                  : "Not a plant? Remove from audit"}
-              </button>
-
-              <button
-                type="button"
-                onClick={onReport}
-                className="mt-4 inline-flex w-full items-center justify-between rounded-xl bg-[#163f2c] px-3.5 py-3 text-[0.74rem] font-bold text-[#f7f4e9] transition hover:bg-[#22553b]"
-              >
-                See the full plan
-                <ArrowRight className="h-4 w-4 text-[#d7f27a]" />
-              </button>
-            </section>
-          )}
-
-          {/* 6. Complete "Plants in this frame" List */}
-          <section className="audit-grid-list rounded-[1.6rem] border border-[#d5cfbd] bg-[#fbfaf4] shadow-xs">
-            <div className="flex items-center justify-between border-b border-[#e5e0d1] px-4 py-3">
-              <p className="text-[0.74rem] font-bold text-[#263b2b]">
-                Plants in this frame
-              </p>
-              <span className="text-[0.62rem] font-semibold text-[#8b9182]">
-                {audit.detections.length} found
-              </span>
-            </div>
-            <div className="max-h-[22rem] overflow-y-auto p-2">
-              {sortedDetections.map((detection, index) => {
-                const plant: Plant = getPlant(detection.plantId) || ({
-                  id: detection.plantId,
-                  commonName: (detection as any).commonName || detection.plantId.replace(/-/g, " "),
-                  scientificName: (detection as any).scientificName || detection.plantId,
-                  status: "native" as const,
-                  njStatus: "NATIVE" as const,
-                  type: "Perennial" as const,
-                  sun: "Full Sun / Partial Shade",
-                  moisture: "Medium",
-                  bloom: "Summer",
-                  height: "2-4 ft",
-                  description: detection.note || "Detected plant",
-                  swapIds: [],
-                  lepidoptera: 10,
-                } as Plant);
-                const selected = detection.id === selectedDetection?.id;
-                return (
-                  <button
-                    key={detection.id}
-                    type="button"
-                    onClick={() => setSelectedId(detection.id)}
-                    className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition ${selected ? "bg-[#edf3e3]" : "hover:bg-[#f4f1e6]"
+              <div className="max-h-[22rem] overflow-y-auto p-2">
+                {sortedDetections.map((detection, index) => {
+                  const plant: Plant = getPlant(detection.plantId) || ({
+                    id: detection.plantId,
+                    commonName: (detection as any).commonName || detection.plantId.replace(/-/g, " "),
+                    scientificName: (detection as any).scientificName || detection.plantId,
+                    status: "native" as const,
+                    njStatus: "NATIVE" as const,
+                    type: "Perennial" as const,
+                    sun: "Full Sun / Partial Shade",
+                    moisture: "Medium",
+                    bloom: "Summer",
+                    height: "2-4 ft",
+                    description: detection.note || "Detected plant",
+                    swapIds: [],
+                    lepidoptera: 10,
+                  } as Plant);
+                  const selected = detection.id === selectedDetection?.id;
+                  return (
+                    <button
+                      key={detection.id}
+                      type="button"
+                      onClick={() => setSelectedId(detection.id)}
+                      className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition ${
+                        selected ? "bg-[#edf3e3]" : "hover:bg-[#f4f1e6]"
                       }`}
-                  >
-                    <span
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[0.6rem] font-bold text-white"
-                      style={{ background: getStatusMeta(plant).color }}
                     >
-                      {index + 1}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[0.74rem] font-bold text-[#263b2b]">
-                        <span className="text-[#3f7d45] mr-1.5 font-extrabold">#{index + 1}</span>
-                        {plant.commonName}
-                        {detection.verified ? (
-                          <span
-                            className="ml-1.5 inline-flex items-center gap-0.5 rounded-full bg-[#e3f4e5] px-1.5 py-0.5 align-middle text-[0.58rem] font-bold text-[#1b5e20]"
-                            title="Verified identification"
-                          >
-                            <Check className="h-2.5 w-2.5 stroke-[3]" />
-                            Verified
-                          </span>
-                        ) : (
-                          <span
-                            className={`ml-1.5 inline-flex items-center rounded-full px-1.5 py-0.2 align-middle text-[0.58rem] font-bold ${detection.confidence >= 0.8
-                                ? "bg-[#eaf1e3] text-[#2c5b31]"
-                                : detection.confidence >= 0.65
-                                  ? "bg-[#fdf1d6] text-[#8a6420]"
-                                  : "bg-[#fae6e3] text-[#9b2c1f]"
+                      <span
+                        className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[0.6rem] font-bold text-white"
+                        style={{ background: getStatusMeta(plant).color }}
+                      >
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[0.74rem] font-bold text-[#263b2b]">
+                          <span className="text-[#3f7d45] mr-1.5 font-extrabold">#{index + 1}</span>
+                          {plant.commonName}
+                          {detection.verified ? (
+                            <span
+                              className="ml-1.5 inline-flex items-center gap-0.5 rounded-full bg-[#e3f4e5] px-1.5 py-0.5 align-middle text-[0.58rem] font-bold text-[#1b5e20]"
+                              title="Verified identification"
+                            >
+                              <Check className="h-2.5 w-2.5 stroke-[3]" />
+                              Verified
+                            </span>
+                          ) : (
+                            <span
+                              className={`ml-1.5 inline-flex items-center rounded-full px-1.5 py-0.2 align-middle text-[0.58rem] font-bold ${
+                                detection.confidence >= 0.8
+                                  ? "bg-[#eaf1e3] text-[#2c5b31]"
+                                  : detection.confidence >= 0.65
+                                    ? "bg-[#fdf1d6] text-[#8a6420]"
+                                    : "bg-[#fae6e3] text-[#9b2c1f]"
                               }`}
-                            title={`Match confidence: ${Math.round(detection.confidence * 100)}%`}
-                          >
-                            {Math.round(detection.confidence * 100)}%
-                          </span>
-                        )}
+                              title={`Match confidence: ${Math.round(detection.confidence * 100)}%`}
+                            >
+                              {Math.round(detection.confidence * 100)}%
+                            </span>
+                          )}
+                        </span>
+                        <span className="block truncate text-[0.62rem] italic text-[#9a9f91]">
+                          {plant.scientificName}
+                        </span>
                       </span>
-                      <span className="block truncate text-[0.62rem] italic text-[#9a9f91]">
-                        {plant.scientificName}
-                      </span>
-                    </span>
-                    <StatusBadge
-                      status={plant.status}
-                      njStatus={plant.njStatus}
-                      short
-                      className="shrink-0"
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+                      <StatusBadge
+                        status={plant.status}
+                        njStatus={plant.njStatus}
+                        short
+                        className="shrink-0"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
         </div>
 
         <section className="mt-6 overflow-hidden rounded-[1.8rem] bg-[#163f2c] p-5 text-[#f7f4e9] sm:p-7">
