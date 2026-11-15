@@ -646,7 +646,7 @@ export function ReportView({
             )}
           </section>
 
-          <section className="report-section">
+          <section data-demo-target="report-swaps" className="report-section">
             <SectionHeading
               number="02"
               kicker="The rebuild"
@@ -752,7 +752,10 @@ export function ReportView({
               title="Local nursery & planting calendar"
             />
             <div className="mt-5 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="rounded-2xl border border-[#d9d4c4] bg-[#fbfaf4] p-4">
+              <div
+                data-demo-target="report-nurseries"
+                className="rounded-2xl border border-[#d9d4c4] bg-[#fbfaf4] p-4"
+              >
                 <p className="flex items-center gap-2 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5d6b60]">
                   <Sprout className="h-4 w-4 text-[#3f7d45]" />
                   Verified New Jersey native nurseries
@@ -794,7 +797,10 @@ export function ReportView({
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[#d9d4c4] bg-[#fbfaf4] p-4">
+              <div
+                data-demo-target="report-calendar"
+                className="rounded-2xl border border-[#d9d4c4] bg-[#fbfaf4] p-4"
+              >
                 <p className="flex items-center gap-2 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[#5d6b60]">
                   <CalendarDays className="h-4 w-4 text-[#a87a2c]" />
                   Your planting year

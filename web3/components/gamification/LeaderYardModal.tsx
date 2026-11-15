@@ -28,6 +28,7 @@ export function LeaderYardModal({ leader, rank, onClose }: LeaderYardModalProps)
       onClick={onClose}
     >
       <div
+        data-demo-target="leader-modal-card"
         className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-[#e2dec9] bg-[#faf9f5] p-5 sm:p-7 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
