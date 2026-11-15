@@ -44,6 +44,7 @@ import type {
 } from "@/lib/types";
 
 type DemoStageId =
+  | "landing-home"
   | "landing-snap"
   | "audit-boxes"
   | "audit-score"
@@ -54,12 +55,17 @@ type DemoStageId =
 
 interface DemoStageConfig {
   id: DemoStageId;
-  targetSelector: string;
+  targetSelector: string | null;
   label: string;
   scrollBlock?: ScrollLogicalPosition;
 }
 
 const STAGES: DemoStageConfig[] = [
+  {
+    id: "landing-home",
+    targetSelector: null,
+    label: "",
+  },
   {
     id: "landing-snap",
     targetSelector: "#audit",
@@ -235,6 +241,11 @@ export default function LiveInteractiveDemoPage() {
     const frame = frameRef.current;
     if (!wrapper || !frame) return;
 
+    if (!stage.targetSelector) {
+      setHighlightBox(null);
+      return;
+    }
+
     const target = frame.querySelector(stage.targetSelector) as HTMLElement | null;
     if (!target) {
       setHighlightBox(null);
@@ -267,6 +278,11 @@ export default function LiveInteractiveDemoPage() {
     }
 
     const timer = window.setTimeout(() => {
+      if (!stage.targetSelector) {
+        container.scrollTo({ top: 0, behavior: "smooth" });
+        setHighlightBox(null);
+        return;
+      }
       const target = container.querySelector(stage.targetSelector) as HTMLElement | null;
       if (target) {
         target.scrollIntoView({
@@ -320,11 +336,11 @@ export default function LiveInteractiveDemoPage() {
     return () => document.removeEventListener("fullscreenchange", onFsChange);
   }, []);
 
-  function handlePointerDown(e: React.PointerEvent) {
+  function handlePointerDownCapture(e: React.PointerEvent) {
     pointerDownPos.current = { x: e.clientX, y: e.clientY };
   }
 
-  function handleStageClick(e: React.MouseEvent) {
+  function handleStageClickCapture(e: React.MouseEvent) {
     if (!clickToAdvance) return;
     // Ignore clicks on floating demo controls
     if ((e.target as HTMLElement).closest("[data-demo-controls]")) return;
@@ -334,6 +350,8 @@ export default function LiveInteractiveDemoPage() {
       const dy = Math.abs(e.clientY - pointerDownPos.current.y);
       if (dx > 6 || dy > 6) return;
     }
+    e.stopPropagation();
+    e.preventDefault();
     goNext();
   }
 
@@ -394,16 +412,16 @@ export default function LiveInteractiveDemoPage() {
         {/* Scrollable Live App Viewport Wrapper */}
         <div
           ref={stageWrapperRef}
-          onPointerDown={handlePointerDown}
-          onClick={handleStageClick}
+          onPointerDownCapture={handlePointerDownCapture}
+          onClickCapture={handleStageClickCapture}
           className="relative flex-1 overflow-hidden bg-[#faf9f5] flex flex-col"
         >
         <div
           ref={scrollContainerRef}
           className="relative flex-1 overflow-y-auto overflow-x-hidden bg-[#faf9f5]"
         >
-          {/* STAGE 1: Real LandingPage */}
-          {stage.id === "landing-snap" && (
+          {/* STAGES 1 & 2: Real LandingPage (Home -> Snap Yard) */}
+          {(stage.id === "landing-home" || stage.id === "landing-snap") && (
             <LandingPage
               photo={photo}
               zip={zip}
@@ -432,13 +450,13 @@ export default function LiveInteractiveDemoPage() {
             />
           )}
 
-          {/* STAGES 2 & 3: Real AuditView */}
+          {/* STAGES 3 & 4: Real AuditView */}
           {(stage.id === "audit-boxes" || stage.id === "audit-score") && (
             <AuditView
               audit={audit}
               photo={photo}
               onAuditChange={setAudit}
-              onReport={() => setStageIndex(3)}
+              onReport={() => setStageIndex(4)}
               onReset={() => setStageIndex(0)}
               onHome={() => setStageIndex(0)}
               user={user}
@@ -448,12 +466,12 @@ export default function LiveInteractiveDemoPage() {
             />
           )}
 
-          {/* STAGES 4 & 5: Real ReportView */}
+          {/* STAGES 5 & 6: Real ReportView */}
           {(stage.id === "report-swaps" || stage.id === "report-calendar") && (
             <ReportView
               audit={audit}
               photo={photo}
-              onBack={() => setStageIndex(1)}
+              onBack={() => setStageIndex(2)}
               onReset={() => setStageIndex(0)}
               onHome={() => setStageIndex(0)}
               user={user}
@@ -607,12 +625,12 @@ export default function LiveInteractiveDemoPage() {
                 )}
               </main>
 
-              {/* Stage 7: Auto-opened Leader Yard Modal */}
+              {/* Stage 8: Auto-opened Leader Yard Modal */}
               {stage.id === "leader-modal" && featuredLeader && (
                 <LeaderYardModal
                   leader={featuredLeader}
                   rank={1}
-                  onClose={() => setStageIndex(5)}
+                  onClose={() => setStageIndex(6)}
                 />
               )}
             </div>
