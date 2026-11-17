@@ -272,18 +272,19 @@ export default function LiveInteractiveDemoPage() {
     const container = scrollContainerRef.current;
     if (!container) return;
 
+    if (!stage.targetSelector) {
+      setHighlightBox(null);
+      container.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     // Reset scroll to top on view transitions before scrolling to target
     if (stage.id === "progress-leaderboard") {
       setProgressSubTab("leaderboard");
     }
 
     const timer = window.setTimeout(() => {
-      if (!stage.targetSelector) {
-        container.scrollTo({ top: 0, behavior: "smooth" });
-        setHighlightBox(null);
-        return;
-      }
-      const target = container.querySelector(stage.targetSelector) as HTMLElement | null;
+      const target = container.querySelector(stage.targetSelector!) as HTMLElement | null;
       if (target) {
         target.scrollIntoView({
           behavior: "smooth",
@@ -423,10 +424,10 @@ export default function LiveInteractiveDemoPage() {
           {/* STAGES 1 & 2: Real LandingPage (Home -> Snap Yard) */}
           {(stage.id === "landing-home" || stage.id === "landing-snap") && (
             <LandingPage
-              photo={photo}
+              photo={stage.id === "landing-home" ? null : photo}
               zip={zip}
               error=""
-              isSample={true}
+              isSample={stage.id !== "landing-home"}
               onPhoto={() => {}}
               onSample={() => goNext()}
               onSelectSample={(key) => {
@@ -638,7 +639,7 @@ export default function LiveInteractiveDemoPage() {
         </div>
 
         {/* Live DOM-Tracking Animated Red Highlight Box (clipped inside 1080p stage) */}
-        {highlightBox && (
+        {stage.targetSelector && highlightBox && (
           <div
             style={{
               top: `${highlightBox.top - 6}px`,
